@@ -163,9 +163,84 @@
   .veh-hist li{padding:8px 0;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:baseline}
   .veh-hist li:last-child{border:none}
   .mini-date{font-family:'SF Mono',ui-monospace,monospace;font-size:11.5px;color:var(--muted);white-space:nowrap}
+
+  /* ---- Login ---- */
+  .auth-screen{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,#0f172a,#1e293b);padding:20px}
+  .auth-card{background:#fff;border-radius:18px;width:100%;max-width:400px;box-shadow:0 24px 64px rgba(0,0,0,.4);overflow:hidden}
+  .auth-head{padding:30px 32px 22px;text-align:center}
+  .auth-head .logo{width:56px;height:56px;border-radius:14px;background:linear-gradient(135deg,#3b82f6,#2563eb);
+    display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 14px}
+  .auth-head h1{margin:0;font-size:19px;font-weight:800}
+  .auth-head p{margin:5px 0 0;color:var(--muted);font-size:13px}
+  .auth-body{padding:8px 32px 30px}
+  .auth-body .field{margin-bottom:14px}
+  .auth-err{background:var(--danger-soft);color:var(--danger);border:1px solid #fecaca;border-radius:9px;
+    padding:10px 12px;font-size:12.5px;font-weight:600;margin-bottom:14px;display:none}
+  .auth-err.show{display:block}
+  .auth-body .btn.primary{width:100%;justify-content:center;padding:12px}
+  .auth-foot{text-align:center;color:var(--muted2);font-size:11px;padding:0 32px 22px}
+  #app-root{display:none}
+  #app-root.ready{display:block}
+
+  /* ---- Usuario en barra lateral ---- */
+  .userbox{padding:12px 14px;border-top:1px solid #1e293b;display:flex;align-items:center;gap:10px}
+  .userbox .av{width:34px;height:34px;border-radius:9px;background:#334155;color:#fff;display:flex;
+    align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+  .userbox .who{flex:1;min-width:0}
+  .userbox .who .nm{color:#fff;font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .userbox .who .rl{font-size:10.5px;color:#94a3b8;text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+  .userbox .logout{background:none;border:none;color:#94a3b8;font-size:16px;padding:6px;border-radius:8px}
+  .userbox .logout:hover{background:#1e293b;color:#fff}
+  .rolechip{display:inline-block;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.04em}
+  .rolechip.jefe{background:#f5f3ff;color:#7c3aed}
+  .rolechip.panel2{background:#eff6ff;color:#1d4ed8}
+  .rolechip.panel3{background:#ecfdf5;color:#059669}
+
+  /* ---- Panel de accesos ---- */
+  .perm-list{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:720px){.perm-list{grid-template-columns:1fr}}
+  .perm-item{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:11px;padding:13px 15px;cursor:pointer;transition:.12s}
+  .perm-item:hover{border-color:var(--line2);background:var(--panel-2)}
+  .perm-item.on{border-color:var(--brand);background:var(--brand-soft)}
+  .perm-item .sw{width:40px;height:23px;border-radius:20px;background:var(--line2);position:relative;flex-shrink:0;transition:.15s}
+  .perm-item .sw::after{content:'';position:absolute;top:2px;left:2px;width:19px;height:19px;border-radius:50%;background:#fff;transition:.15s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .perm-item.on .sw{background:var(--brand)}
+  .perm-item.on .sw::after{left:19px}
+  .perm-item .pico{font-size:19px;width:24px;text-align:center}
+  .perm-item .pt{font-weight:700;font-size:13.5px}
+  .perm-item .pd{font-size:11.5px;color:var(--muted)}
+  .perm-item.locked{opacity:.5;cursor:not-allowed}
 </style>
 </head>
 <body>
+
+<!-- ===== Pantalla de acceso ===== -->
+<div class="auth-screen" id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-head">
+      <div class="logo">🚗</div>
+      <h1>Plataforma de Control</h1>
+      <p>Vehículos de Reemplazo · Acceso</p>
+    </div>
+    <form class="auth-body" id="auth-form" autocomplete="on">
+      <div class="auth-err" id="auth-err"></div>
+      <div class="field">
+        <label>Correo electrónico</label>
+        <input type="email" id="auth-email" placeholder="tucorreo@ejemplo.com" autocomplete="username" required>
+      </div>
+      <div class="field">
+        <label>Contraseña</label>
+        <input type="password" id="auth-pass" placeholder="••••••••" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="btn primary" id="auth-btn"><span>🔐</span> Ingresar</button>
+    </form>
+    <div class="auth-foot">Cada nivel ve solo las secciones que su superior le habilita.</div>
+  </div>
+</div>
+
+<!-- ===== Aplicación (visible tras iniciar sesión) ===== -->
+<div id="app-root">
 <div class="app">
   <!-- Sidebar -->
   <aside class="side">
@@ -179,15 +254,27 @@
     <nav>
       <div class="nav-label">Operación</div>
       <button class="nav-item active" data-view="panel"><span class="ico">📊</span> Panel de control</button>
+      <button class="nav-item hide" data-view="municipios" id="nav-municipios"><span class="ico">🏛️</span> Municipalidades <span class="badge" id="badge-mun">0</span></button>
       <button class="nav-item" data-view="solicitudes"><span class="ico">📋</span> Solicitudes <span class="badge" id="badge-sol">0</span></button>
       <button class="nav-item" data-view="vehiculos"><span class="ico">🚙</span> Vehículos <span class="badge" id="badge-veh">0</span></button>
       <div class="nav-label">Gestión</div>
       <button class="nav-item" data-view="nueva"><span class="ico">➕</span> Nueva solicitud</button>
       <button class="nav-item" data-view="exportar"><span class="ico">📤</span> Exportar datos</button>
       <button class="nav-item" data-view="requisitos"><span class="ico">✅</span> Requisitos</button>
+      <div class="nav-label hide" id="nav-label-admin">Administración</div>
+      <button class="nav-item hide" data-view="usuarios" id="nav-usuarios"><span class="ico">👥</span> Usuarios</button>
+      <button class="nav-item hide" data-view="accesos" id="nav-accesos"><span class="ico">🔐</span> Gestión de accesos</button>
     </nav>
+    <div class="userbox" id="userbox">
+      <div class="av" id="user-av">–</div>
+      <div class="who">
+        <div class="nm" id="user-nm">—</div>
+        <div class="rl" id="user-rl">—</div>
+      </div>
+      <button class="logout" id="btn-logout" title="Cerrar sesión">⏻</button>
+    </div>
     <div class="side-foot">
-      Prototipo demostrativo<br>Cumple bases de licitación · v1.0
+      Cumple bases de licitación · v2.0
     </div>
   </aside>
 
@@ -199,7 +286,7 @@
         <div class="sub" id="view-sub">Resumen general del servicio</div>
       </div>
       <div class="spacer"></div>
-      <button class="btn primary" onclick="openNueva()"><span>➕</span> Nueva solicitud</button>
+      <button class="btn primary" id="topbar-nueva" onclick="openNueva()"><span>➕</span> Nueva solicitud</button>
     </div>
     <div class="content" id="content"><!-- render --></div>
   </div>
@@ -211,8 +298,191 @@
 </div>
 
 <div class="toast" id="toast"></div>
+</div><!-- /#app-root -->
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+/* ============================================================
+   CONFIGURACIÓN SUPABASE
+   Reemplaza estos dos valores por los de tu proyecto
+   (Supabase → Project Settings → API). La anon key es pública.
+   ============================================================ */
+const SUPABASE_URL = 'https://eopilefylzusqqggachm.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_KRsV3ilrT9nsoSRDeCT_LA_8czZ8FhS';
+
+const sb = (window.supabase && SUPABASE_URL.indexOf('http') === 0)
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  : null;
+
+/* ============================================================
+   ESTADO DE SESIÓN Y PERMISOS
+   ============================================================ */
+const ALL_SECTIONS = ['panel','solicitudes','vehiculos','nueva','exportar','requisitos'];
+const SECTION_INFO = {
+  panel:       {label:'Panel de control', ico:'📊', desc:'Resumen general del servicio'},
+  solicitudes: {label:'Solicitudes',      ico:'📋', desc:'Historial de solicitudes y fechas'},
+  vehiculos:   {label:'Vehículos',        ico:'🚙', desc:'Registro de placas patentes'},
+  nueva:       {label:'Nueva solicitud',  ico:'➕', desc:'Crear ingresos, siniestros y reemplazos'},
+  exportar:    {label:'Exportar datos',   ico:'📤', desc:'Extracción de la base de datos'},
+  requisitos:  {label:'Requisitos',       ico:'✅', desc:'Trazabilidad con las bases'},
+};
+const ALL_ACTIONS = ['crear','editar','eliminar','exportar'];
+const ACTION_INFO = {
+  crear:    {label:'Crear',    ico:'➕',  desc:'Crear solicitudes y registrar vehículos'},
+  editar:   {label:'Editar',   ico:'✏️', desc:'Actualizar fechas, estado y datos'},
+  eliminar: {label:'Eliminar', ico:'🗑️', desc:'Eliminar solicitudes y vehículos'},
+  exportar: {label:'Exportar', ico:'📤',  desc:'Descargar datos (CSV / JSON)'},
+};
+const ROLE_LABEL = {jefe:'Jefe', panel2:'Panel 2', panel3:'Panel 3'};
+
+let session = null;        // sesión de Supabase
+let myRole = null;         // 'jefe' | 'panel2' | 'panel3'
+let myName = '';           // nombre / correo
+// Permisos por nivel: cada nivel tiene secciones (qué ve) y acciones (qué puede hacer)
+let perms = {panel2:{sections:[],actions:[]}, panel3:{sections:[],actions:[]}};
+
+/* Secciones que YO puedo ver, según mi rol */
+function mySections(){
+  if(myRole === 'jefe')   return ALL_SECTIONS.slice();
+  if(myRole === 'panel2') return (perms.panel2.sections||[]).slice();
+  if(myRole === 'panel3') return (perms.panel3.sections||[]).slice();
+  return [];
+}
+/* Acciones que YO puedo ejecutar, según mi rol */
+function myActions(){
+  if(myRole === 'jefe')   return ALL_ACTIONS.slice();
+  if(myRole === 'panel2') return (perms.panel2.actions||[]).slice();
+  if(myRole === 'panel3') return (perms.panel3.actions||[]).slice();
+  return [];
+}
+/* ¿Puedo ejecutar esta acción? */
+function can(action){ return myActions().includes(action); }
+/* ¿A qué nivel le configuro accesos? */
+function targetRole(){
+  if(myRole === 'jefe')   return 'panel2';
+  if(myRole === 'panel2') return 'panel3';
+  return null;
+}
+/* El Jefe/Panel 2 tienen la vista de administración de accesos */
+function canManage(){ return myRole === 'jefe' || myRole === 'panel2'; }
+function isAllowedView(view){
+  if(view === 'accesos' || view === 'municipios' || view === 'usuarios') return canManage();
+  if(view === 'nueva') return mySections().includes('nueva') && can('crear');
+  return mySections().includes(view);
+}
+
+/* ============================================================
+   AUTENTICACIÓN
+   ============================================================ */
+function authErr(msg){
+  const e = document.getElementById('auth-err');
+  e.textContent = msg; e.classList.add('show');
+}
+async function doLogin(ev){
+  ev.preventDefault();
+  if(!sb){ authErr('La plataforma aún no está conectada a la base de datos.'); return; }
+  const email = document.getElementById('auth-email').value.trim();
+  const pass  = document.getElementById('auth-pass').value;
+  const btn = document.getElementById('auth-btn');
+  btn.disabled = true; btn.innerHTML = 'Ingresando…';
+  document.getElementById('auth-err').classList.remove('show');
+  const {error} = await sb.auth.signInWithPassword({email, password:pass});
+  btn.disabled = false; btn.innerHTML = '<span>🔐</span> Ingresar';
+  if(error){
+    authErr(error.message === 'Invalid login credentials'
+      ? 'Correo o contraseña incorrectos.' : error.message);
+  }
+}
+async function doLogout(){
+  if(sb) await sb.auth.signOut();
+  location.reload();
+}
+async function loadProfileAndPerms(){
+  // Perfil (rol)
+  const {data:prof} = await sb.from('profiles').select('role,full_name').eq('id', session.user.id).maybeSingle();
+  myRole = prof?.role || 'panel3';
+  myName = prof?.full_name || session.user.email;
+  // Permisos en cascada (secciones + acciones)
+  const {data:prows} = await sb.from('permissions').select('target_role,sections,actions');
+  perms = {panel2:{sections:[],actions:[]}, panel3:{sections:[],actions:[]}};
+  (prows||[]).forEach(r => { perms[r.target_role] = {sections:r.sections||[], actions:r.actions||[]}; });
+}
+function subscribePerms(){
+  if(!sb) return;
+  sb.channel('perms-changes')
+    .on('postgres_changes', {event:'*', schema:'public', table:'permissions'}, async () => {
+      const {data:prows} = await sb.from('permissions').select('target_role,sections,actions');
+      perms = {panel2:{sections:[],actions:[]}, panel3:{sections:[],actions:[]}};
+      (prows||[]).forEach(r => { perms[r.target_role] = {sections:r.sections||[], actions:r.actions||[]}; });
+      applyPermissions();
+      render();
+    }).subscribe();
+}
+
+/* Aplica visibilidad de nav + info de usuario */
+function applyPermissions(){
+  const allowed = mySections();
+  document.querySelectorAll('.nav-item[data-view]').forEach(b => {
+    const v = b.dataset.view;
+    if(v === 'accesos' || v === 'municipios') return; // se manejan aparte
+    // 'nueva' además requiere la acción 'crear'
+    const ok = allowed.includes(v) && (v !== 'nueva' || can('crear'));
+    b.classList.toggle('hide', !ok);
+  });
+  // Municipalidades (solo jefe / panel2)
+  document.getElementById('nav-municipios').classList.toggle('hide', !canManage());
+  // Vista de administración (solo jefe / panel2)
+  document.getElementById('nav-usuarios').classList.toggle('hide', !canManage());
+  document.getElementById('nav-accesos').classList.toggle('hide', !canManage());
+  document.getElementById('nav-label-admin').classList.toggle('hide', !canManage());
+  // Botón "Nueva solicitud" del topbar (requiere sección 'nueva' y acción 'crear')
+  const tn = document.getElementById('topbar-nueva');
+  if(tn) tn.classList.toggle('hide', !(allowed.includes('nueva') && can('crear')));
+  // Caja de usuario
+  document.getElementById('user-nm').textContent = myName;
+  document.getElementById('user-rl').textContent = ROLE_LABEL[myRole] || myRole;
+  document.getElementById('user-av').textContent = (myName||'?').trim().charAt(0).toUpperCase();
+  // Si la vista actual dejó de estar permitida, ir a la primera disponible
+  if(!isAllowedView(currentView)){
+    const first = mySections()[0] || (canManage() ? 'accesos' : null);
+    if(first) nav(first);
+    else { $('#content').innerHTML = `<div class="empty"><div class="ico">🔒</div>No tienes secciones habilitadas todavía. Contacta a tu superior.</div>`; }
+  }
+}
+
+/* Carga de datos reales (solicitudes + municipalidades) */
+async function loadData(){
+  if(!sb) return;
+  const {data:sol} = await sb.from('solicitudes').select('*').order('created_at',{ascending:false});
+  solicitudes = sol || [];
+  const {data:veh} = await sb.from('vehiculos').select('*').order('created_at',{ascending:false});
+  vehiculos = veh || [];
+  if(myRole==='jefe' || myRole==='panel2'){
+    const {data:profs} = await sb.from('profiles').select('id,full_name,role');
+    allProfiles = profs || [];
+    municipios = allProfiles.filter(p=>p.role==='panel3');
+  } else { allProfiles = []; municipios = []; }
+}
+function subscribeData(){
+  if(!sb) return;
+  sb.channel('data-changes')
+    .on('postgres_changes', {event:'*', schema:'public', table:'solicitudes'}, async () => { await loadData(); render(); })
+    .on('postgres_changes', {event:'*', schema:'public', table:'vehiculos'}, async () => { await loadData(); render(); })
+    .subscribe();
+}
+
+async function startApp(){
+  await loadProfileAndPerms();
+  await loadData();
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app-root').classList.add('ready');
+  applyPermissions();
+  const first = mySections().includes('panel') ? 'panel' : (mySections()[0] || (canManage() ? 'accesos' : null));
+  if(first) nav(first); else applyPermissions();
+  subscribePerms();
+  subscribeData();
+}
+
 /* ============================================================
    MODELO DE DATOS (en memoria — prototipo)
    Entidades: solicitudes y vehículos.
@@ -225,35 +495,14 @@
 
 const TIPOS = ['Ingreso a servicio','Siniestro','Vehículo de reemplazo'];
 const ESTADOS = ['Solicitada','En servicio','Vehículo entregado','Vehículo retirado','Cerrada'];
+const RESP_ESTADOS = ['En revisión','Aprobada','Rechazada'];
 
-let vehiculos = [
-  {placa:'GKRT-45', marca:'Toyota',    modelo:'Corolla',   anio:2023, color:'Blanco', estado:'Asignado'},
-  {placa:'HJPL-92', marca:'Hyundai',   modelo:'Accent',    anio:2022, color:'Gris',   estado:'Disponible'},
-  {placa:'LMBS-17', marca:'Kia',       modelo:'Rio',       anio:2024, color:'Rojo',   estado:'Disponible'},
-  {placa:'FTZK-03', marca:'Chevrolet', modelo:'Sail',      anio:2021, color:'Negro',  estado:'En taller'},
-  {placa:'PDRV-88', marca:'Nissan',    modelo:'Versa',     anio:2023, color:'Plata',  estado:'Asignado'},
-  {placa:'BWQC-56', marca:'Suzuki',    modelo:'Swift',     anio:2024, color:'Azul',   estado:'Disponible'},
-];
+let vehiculos = [];   // vehículos reales, asignados por municipalidad (Panel 2 los designa)
 
-let solicitudes = [
-  {folio:'SOL-2026-0001', tipo:'Ingreso a servicio', placa:'GKRT-45', solicitante:'Aseg. Andes S.A.', contacto:'María Rojas', sucursal:'Santiago Centro',
-    descripcion:'Ingreso a servicio por mantención preventiva programada.', estado:'Vehículo retirado',
-    fechaSolicitud:'2026-07-10', fechaIngresoServicio:'2026-07-11', fechaNotificacionEntrega:'2026-07-11', fechaRetiro:'2026-07-18'},
-  {folio:'SOL-2026-0002', tipo:'Siniestro', placa:'PDRV-88', solicitante:'Aseg. Andes S.A.', contacto:'Juan Pérez', sucursal:'Providencia',
-    descripcion:'Colisión menor en estacionamiento, requiere evaluación de daños.', estado:'Vehículo entregado',
-    fechaSolicitud:'2026-07-15', fechaIngresoServicio:'2026-07-16', fechaNotificacionEntrega:'2026-07-17', fechaRetiro:''},
-  {folio:'SOL-2026-0003', tipo:'Vehículo de reemplazo', placa:'HJPL-92', solicitante:'Flota Sur Ltda.', contacto:'Carla Muñoz', sucursal:'Maipú',
-    descripcion:'Solicitud de vehículo de reemplazo mientras el titular está en taller.', estado:'En servicio',
-    fechaSolicitud:'2026-07-20', fechaIngresoServicio:'2026-07-21', fechaNotificacionEntrega:'', fechaRetiro:''},
-  {folio:'SOL-2026-0004', tipo:'Siniestro', placa:'FTZK-03', solicitante:'Aseg. Andes S.A.', contacto:'Pedro Soto', sucursal:'Santiago Centro',
-    descripcion:'Siniestro con daño estructural, vehículo derivado a taller especializado.', estado:'En servicio',
-    fechaSolicitud:'2026-07-21', fechaIngresoServicio:'2026-07-22', fechaNotificacionEntrega:'', fechaRetiro:''},
-  {folio:'SOL-2026-0005', tipo:'Vehículo de reemplazo', placa:'', solicitante:'Flota Sur Ltda.', contacto:'Ana Vidal', sucursal:'Ñuñoa',
-    descripcion:'Requiere vehículo de reemplazo categoría sedán para cliente corporativo.', estado:'Solicitada',
-    fechaSolicitud:'2026-07-23', fechaIngresoServicio:'', fechaNotificacionEntrega:'', fechaRetiro:''},
-];
-
-let folioSeq = 6;
+// Datos reales desde Supabase
+let solicitudes = [];   // solicitudes (municipalidad las envía, Panel 2 responde)
+let municipios = [];    // perfiles de municipalidades (role='panel3'), para Jefe/Panel 2
+let allProfiles = [];   // todos los perfiles (para administración de usuarios)
 
 /* ============================================================
    UTILIDADES
@@ -272,6 +521,13 @@ function estadoTag(e){
   return `<span class="tag ${map[e]||'s-solicitada'}">${esc(e)}</span>`;
 }
 function plate(p){ return p ? `<span class="plate">${esc(p)}</span>` : '<span style="color:var(--muted2)">Sin asignar</span>'; }
+function respTag(e){
+  const map={'En revisión':'s-entregado','Aprobada':'s-cerrada','Rechazada':'t-siniestro'};
+  const ico={'En revisión':'⏳','Aprobada':'✅','Rechazada':'⛔'};
+  e=e||'En revisión';
+  return `<span class="tag ${map[e]||'s-solicitada'}">${ico[e]||''} ${esc(e)}</span>`;
+}
+const fmtD = d => d ? new Date((d.length>10?d:d+'T00:00:00')).toLocaleDateString('es-CL',{day:'2-digit',month:'short',year:'numeric'}) : '—';
 
 function toast(msg){
   const t=$('#toast'); t.innerHTML='✓ '+esc(msg); t.classList.add('show');
@@ -289,8 +545,12 @@ const VIEW_META={
   nueva:['Nueva solicitud','Agendar ingreso, notificar siniestro o solicitar reemplazo'],
   exportar:['Exportar datos','Extracción de la base de datos'],
   requisitos:['Requisitos','Trazabilidad con las bases de licitación'],
+  municipios:['Municipalidades','Solicitudes por municipalidad y respuestas'],
+  usuarios:['Usuarios','Crear y ver las cuentas del nivel inferior'],
+  accesos:['Gestión de accesos','Habilita qué puede ver y hacer el nivel inferior'],
 };
 function nav(view){
+  if(!isAllowedView(view)){ toast('No tienes acceso a esa sección'); return; }
   currentView=view;
   document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.view===view));
   $('#view-title').textContent=VIEW_META[view][0];
@@ -302,6 +562,7 @@ document.querySelectorAll('.nav-item').forEach(b=>b.addEventListener('click',()=
 function refreshBadges(){
   $('#badge-sol').textContent=solicitudes.length;
   $('#badge-veh').textContent=vehiculos.length;
+  const bm=$('#badge-mun'); if(bm) bm.textContent=municipios.length;
 }
 
 /* ============================================================
@@ -316,100 +577,255 @@ function render(){
   else if(currentView==='nueva') c.innerHTML=renderNueva();
   else if(currentView==='exportar') c.innerHTML=renderExportar();
   else if(currentView==='requisitos') c.innerHTML=renderRequisitos();
+  else if(currentView==='municipios') c.innerHTML=renderMunicipios();
+  else if(currentView==='usuarios') c.innerHTML=renderUsuarios();
+  else if(currentView==='accesos') c.innerHTML=renderAccesos();
   attachViewHandlers();
+}
+
+/* ---------- GESTIÓN DE ACCESOS (cascada) ---------- */
+function permItem(kind, key, info, on, canToggle){
+  return `<div class="perm-item ${on?'on':''} ${canToggle?'':'locked'}" data-${kind}="${key}" ${canToggle?'':'title="No puedes delegar algo que tú no tienes"'}>
+    <span class="pico">${info.ico}</span>
+    <div style="flex:1">
+      <div class="pt">${esc(info.label)}</div>
+      <div class="pd">${esc(info.desc)}</div>
+    </div>
+    <div class="sw"></div>
+  </div>`;
+}
+function renderAccesos(){
+  const tgt = targetRole();
+  if(!tgt) return `<div class="empty"><div class="ico">🔒</div>No tienes permisos de administración.</div>`;
+  // Lo que YO puedo delegar (el Jefe delega todo; el Panel 2 solo lo que tiene)
+  const delSecs = myRole==='jefe' ? ALL_SECTIONS.slice() : mySections().slice();
+  const delActs = myRole==='jefe' ? ALL_ACTIONS.slice()  : myActions().slice();
+  const curSecs = new Set(perms[tgt].sections || []);
+  const curActs = new Set(perms[tgt].actions  || []);
+  const tgtLabel = ROLE_LABEL[tgt];
+
+  const secItems = ALL_SECTIONS.map(k=>permItem('sec', k, SECTION_INFO[k], curSecs.has(k), delSecs.includes(k))).join('');
+  const actItems = ALL_ACTIONS.map(k=>permItem('act', k, ACTION_INFO[k], curActs.has(k), delActs.includes(k))).join('');
+
+  // Resumen del nivel más abajo (solo informativo para el Jefe)
+  let extra = '';
+  if(myRole==='jefe'){
+    const p3s = (perms.panel3.sections||[]), p3a = (perms.panel3.actions||[]);
+    const chips = (arr,info,cls)=> arr.length
+      ? arr.map(k=>`<span class="rolechip ${cls}" style="margin:0 6px 6px 0">${esc(info[k].label)}</span>`).join('')
+      : '<span style="color:var(--muted)">Nada habilitado aún.</span>';
+    extra = `<div class="card" style="margin-top:22px">
+      <div class="card-h"><div><h3>Resumen — Panel 3</h3><div class="sub">Lo que el Panel 2 le ha habilitado al Panel 3 (dentro de lo que tú permitiste)</div></div></div>
+      <div class="card-b">
+        <div class="pd" style="margin-bottom:6px;font-weight:700">Secciones</div>${chips(p3s,SECTION_INFO,'panel3')}
+        <div class="pd" style="margin:14px 0 6px;font-weight:700">Acciones</div>${chips(p3a,ACTION_INFO,'panel3')}
+      </div></div>`;
+  }
+
+  return `
+  <div class="card" style="max-width:900px">
+    <div class="card-h">
+      <div><h3>Permisos del ${esc(tgtLabel)}</h3>
+      <div class="sub">Define qué puede VER (secciones) y qué puede HACER (acciones) el ${esc(tgtLabel)}. Los cambios se aplican a todos en tiempo real.</div></div>
+      <div style="margin-left:auto"><span class="rolechip ${tgt}">${curSecs.size} secciones · ${curActs.size} acciones</span></div>
+    </div>
+    <div class="card-b">
+      <div class="section-title" style="margin-top:0">Secciones que puede ver</div>
+      <div class="perm-list" id="perm-list-sec">${secItems}</div>
+      <div class="section-title">Acciones que puede hacer</div>
+      <div class="perm-list" id="perm-list-act">${actItems}</div>
+      <div style="display:flex;gap:10px;margin-top:22px;align-items:center">
+        <button class="btn primary" id="perm-save"><span>💾</span> Guardar permisos</button>
+        <span class="hint" id="perm-status"></span>
+      </div>
+      ${myRole==='panel2' ? `<p class="req-note">Solo puedes delegar lo que tú tienes disponible. Si tu Jefe te quita algo, se retirará automáticamente del Panel 3.</p>` : ''}
+    </div>
+  </div>
+  ${extra}`;
+}
+
+async function guardarAccesos(){
+  const tgt = targetRole();
+  if(!tgt || !sb) return;
+  const secs = [...document.querySelectorAll('#perm-list-sec .perm-item.on')].map(el=>el.dataset.sec);
+  const acts = [...document.querySelectorAll('#perm-list-act .perm-item.on')].map(el=>el.dataset.act);
+  const status = document.getElementById('perm-status');
+  const btn = document.getElementById('perm-save');
+  btn.disabled = true; btn.innerHTML = 'Guardando…';
+  const {error} = await sb.from('permissions').update({sections:secs, actions:acts}).eq('target_role', tgt);
+  btn.disabled = false; btn.innerHTML = '<span>💾</span> Guardar permisos';
+  if(error){ status.style.color='var(--danger)'; status.textContent = 'Error: '+error.message; return; }
+  perms[tgt] = {sections:secs, actions:acts};
+  status.style.color='var(--ok)'; status.textContent = '✓ Permisos actualizados';
+  toast('Permisos del '+ROLE_LABEL[tgt]+' guardados');
 }
 
 /* ---------- PANEL ---------- */
 function renderPanel(){
-  const activas = solicitudes.filter(s=>s.estado!=='Cerrada' && s.estado!=='Vehículo retirado').length;
-  const siniestros = solicitudes.filter(s=>s.tipo==='Siniestro').length;
-  const reemplazos = solicitudes.filter(s=>s.tipo==='Vehículo de reemplazo').length;
-  const disp = vehiculos.filter(v=>v.estado==='Disponible').length;
+  const esJefeP2 = (myRole==='jefe'||myRole==='panel2');
+  const total = solicitudes.length;
+  const enRev = solicitudes.filter(s=>(s.resp_estado||'En revisión')==='En revisión').length;
+  const aprob = solicitudes.filter(s=>s.resp_estado==='Aprobada').length;
+  const rech  = solicitudes.filter(s=>s.resp_estado==='Rechazada').length;
+  const recientes = solicitudes.slice(0,6);
 
-  const recientes = [...solicitudes].sort((a,b)=>(b.fechaSolicitud||'').localeCompare(a.fechaSolicitud||'')).slice(0,6);
+  const kpis = esJefeP2 ? `
+    <div class="kpi"><div class="ico" style="background:var(--brand-soft);color:var(--brand)">🏛️</div><div class="val">${municipios.length}</div><div class="lab">Municipalidades</div></div>
+    <div class="kpi"><div class="ico" style="background:var(--info-soft);color:var(--info)">📋</div><div class="val">${total}</div><div class="lab">Solicitudes totales</div></div>
+    <div class="kpi"><div class="ico" style="background:var(--warn-soft);color:var(--warn)">⏳</div><div class="val">${enRev}</div><div class="lab">Pendientes de respuesta</div></div>
+    <div class="kpi"><div class="ico" style="background:var(--ok-soft);color:var(--ok)">✅</div><div class="val">${aprob}</div><div class="lab">Aprobadas</div></div>`
+  : `
+    <div class="kpi"><div class="ico" style="background:var(--brand-soft);color:var(--brand)">📋</div><div class="val">${total}</div><div class="lab">Mis solicitudes</div></div>
+    <div class="kpi"><div class="ico" style="background:var(--warn-soft);color:var(--warn)">⏳</div><div class="val">${enRev}</div><div class="lab">En revisión</div></div>
+    <div class="kpi"><div class="ico" style="background:var(--ok-soft);color:var(--ok)">✅</div><div class="val">${aprob}</div><div class="lab">Aprobadas</div></div>
+    <div class="kpi"><div class="ico" style="background:var(--danger-soft);color:var(--danger)">⛔</div><div class="val">${rech}</div><div class="lab">Rechazadas</div></div>`;
 
-  // distribución por estado
-  const byEstado = ESTADOS.map(e=>({e, n:solicitudes.filter(s=>s.estado===e).length}));
-  const maxE = Math.max(1,...byEstado.map(x=>x.n));
+  const recientesTable = recientes.length ? `<table><thead><tr>${esJefeP2?'<th>Municipalidad</th>':''}<th>Folio</th><th>Tipo</th><th>Fecha</th><th>Respuesta</th></tr></thead><tbody>
+    ${recientes.map(s=>`<tr style="cursor:pointer" onclick="openDetalle('${s.id}')">
+      ${esJefeP2?`<td><b>${esc(s.municipio_nombre||'—')}</b></td>`:''}
+      <td><span class="folio">${esc(s.folio||'')}</span></td>
+      <td>${tipoTag(s.tipo)}</td>
+      <td>${fmtD(s.fecha_solicitud||s.created_at)}</td>
+      <td>${respTag(s.resp_estado)}</td></tr>`).join('')}
+    </tbody></table>`
+    : `<div class="empty"><div class="ico">📭</div>${esJefeP2?'Aún no hay solicitudes de las municipalidades.':'Aún no has enviado solicitudes.'}</div>`;
 
-  return `
-  <div class="kpis">
-    <div class="kpi"><div class="ico" style="background:var(--brand-soft);color:var(--brand)">📋</div>
-      <div class="val">${solicitudes.length}</div><div class="lab">Solicitudes totales</div>
-      <span class="trend" style="background:var(--brand-soft);color:var(--brand-d)">${activas} activas</span></div>
-    <div class="kpi"><div class="ico" style="background:var(--danger-soft);color:var(--danger)">⚠️</div>
-      <div class="val">${siniestros}</div><div class="lab">Siniestros notificados</div></div>
-    <div class="kpi"><div class="ico" style="background:var(--purple-soft);color:var(--purple)">🔄</div>
-      <div class="val">${reemplazos}</div><div class="lab">Vehículos de reemplazo</div></div>
-    <div class="kpi"><div class="ico" style="background:var(--ok-soft);color:var(--ok)">🚙</div>
-      <div class="val">${disp}<span style="font-size:16px;color:var(--muted)">/${vehiculos.length}</span></div><div class="lab">Vehículos disponibles</div></div>
-  </div>
+  const munCard = esJefeP2 ? `<div class="card" style="margin-top:22px">
+      <div class="card-h"><div><h3>Municipalidades</h3><div class="sub">Solicitudes recibidas por municipalidad</div></div>
+      <div style="margin-left:auto"><button class="btn sm" onclick="nav('municipios')">Ver detalle →</button></div></div>
+      <div class="card-b" style="padding:0">${municipiosTable()}</div></div>` : '';
 
-  <div class="grid-2">
+  return `<div class="kpis">${kpis}</div>
     <div class="card">
-      <div class="card-h"><div><h3>Solicitudes recientes</h3><div class="sub">Últimas acciones registradas</div></div>
-        <div style="margin-left:auto"><button class="btn sm" onclick="nav('solicitudes')">Ver todas →</button></div></div>
-      <div class="card-b" style="padding:0">
-        <table><thead><tr><th>Folio</th><th>Tipo</th><th>Placa</th><th>Estado</th><th>Solicitud</th></tr></thead><tbody>
-        ${recientes.map(s=>`<tr style="cursor:pointer" onclick="openDetalle('${s.folio}')">
-          <td><span class="folio">${esc(s.folio)}</span></td>
-          <td>${tipoTag(s.tipo)}</td>
-          <td>${plate(s.placa)}</td>
-          <td>${estadoTag(s.estado)}</td>
-          <td>${fmtDate(s.fechaSolicitud)}</td></tr>`).join('')}
-        </tbody></table>
-      </div>
+      <div class="card-h"><div><h3>${esJefeP2?'Solicitudes recientes':'Mis solicitudes recientes'}</h3><div class="sub">Últimas registradas</div></div>
+      <div style="margin-left:auto"><button class="btn sm" onclick="nav('solicitudes')">Ver todas →</button></div></div>
+      <div class="card-b" style="padding:0">${recientesTable}</div>
     </div>
-
-    <div class="card">
-      <div class="card-h"><div><h3>Estado del flujo</h3><div class="sub">Distribución de solicitudes por etapa</div></div></div>
-      <div class="card-b">
-        ${byEstado.map(x=>`
-          <div style="margin-bottom:15px">
-            <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:5px">
-              <span style="font-weight:600">${esc(x.e)}</span><span style="color:var(--muted);font-weight:700">${x.n}</span></div>
-            <div style="height:9px;background:var(--panel-2);border-radius:6px;overflow:hidden">
-              <div style="height:100%;width:${x.n/maxE*100}%;background:var(--brand);border-radius:6px;transition:.4s"></div></div>
-          </div>`).join('')}
-      </div>
+    <div class="card" style="margin-top:22px">
+      <div class="card-h"><div><h3>Fechas de control pendientes</h3><div class="sub">Solicitudes que requieren registrar una fecha</div></div></div>
+      <div class="card-b" style="padding:0">${renderPendientes()}</div>
     </div>
-  </div>
-
-  <div class="card" style="margin-top:22px">
-    <div class="card-h"><div><h3>Fechas de control pendientes</h3><div class="sub">Solicitudes que requieren registrar una fecha</div></div></div>
-    <div class="card-b" style="padding:0">
-      ${renderPendientes()}
-    </div>
-  </div>`;
+    ${munCard}`;
 }
-
 function renderPendientes(){
-  const pend = solicitudes.filter(s=>s.estado!=='Cerrada' && (!s.fechaIngresoServicio||!s.fechaNotificacionEntrega||!s.fechaRetiro));
+  const esJefeP2=(myRole==='jefe'||myRole==='panel2');
+  const pend = solicitudes.filter(s=>s.resp_estado!=='Rechazada' && (!s.fecha_ingreso_servicio||!s.fecha_notificacion_entrega||!s.fecha_retiro));
   if(!pend.length) return `<div class="empty"><div class="ico">✅</div>No hay fechas de control pendientes.</div>`;
-  return `<table><thead><tr><th>Folio</th><th>Placa</th><th>Estado actual</th><th>Próxima fecha por registrar</th><th></th></tr></thead><tbody>
-    ${pend.map(s=>{
+  return `<table><thead><tr>${esJefeP2?'<th>Municipalidad</th>':''}<th>Folio</th><th>Placa</th><th>Próxima fecha por registrar</th><th></th></tr></thead><tbody>
+    ${pend.slice(0,10).map(s=>{
       let next='—';
-      if(!s.fechaIngresoServicio) next='Fecha de ingreso a servicio';
-      else if(!s.fechaNotificacionEntrega) next='Notificación de entrega';
-      else if(!s.fechaRetiro) next='Retiro del vehículo';
-      return `<tr><td><span class="folio">${esc(s.folio)}</span></td><td>${plate(s.placa)}</td><td>${estadoTag(s.estado)}</td>
+      if(!s.fecha_ingreso_servicio) next='Fecha de ingreso a servicio';
+      else if(!s.fecha_notificacion_entrega) next='Notificación de entrega';
+      else if(!s.fecha_retiro) next='Retiro del vehículo';
+      return `<tr>${esJefeP2?`<td><b>${esc(s.municipio_nombre||'—')}</b></td>`:''}<td><span class="folio">${esc(s.folio||'')}</span></td><td>${plate(s.placa)}</td>
         <td style="color:var(--warn);font-weight:600">⏳ ${next}</td>
-        <td class="row-actions"><button class="btn sm primary" onclick="openDetalle('${s.folio}')">Registrar</button></td></tr>`;
+        <td class="row-actions"><button class="btn sm primary" onclick="openDetalle('${s.id}')">Registrar</button></td></tr>`;
     }).join('')}
   </tbody></table>`;
 }
 
+/* ---------- MUNICIPALIDADES (Jefe / Panel 2) ---------- */
+function municipiosTable(){
+  if(!municipios.length) return `<div class="empty"><div class="ico">🏛️</div>No hay municipalidades (usuarios Panel 3) registradas todavía.</div>`;
+  return `<table><thead><tr><th>Municipalidad</th><th>Solicitudes</th><th>Pendientes</th><th>Aprobadas</th><th>Rechazadas</th><th></th></tr></thead><tbody>
+    ${municipios.map(m=>{
+      const list=solicitudes.filter(s=>s.municipio_id===m.id);
+      const pend=list.filter(s=>(s.resp_estado||'En revisión')==='En revisión').length;
+      const apr=list.filter(s=>s.resp_estado==='Aprobada').length;
+      const rej=list.filter(s=>s.resp_estado==='Rechazada').length;
+      return `<tr>
+        <td><b>${esc(m.full_name||'(sin nombre)')}</b></td>
+        <td><b>${list.length}</b></td>
+        <td>${pend?`<span class="tag s-entregado">⏳ ${pend}</span>`:'—'}</td>
+        <td>${apr||'—'}</td>
+        <td>${rej||'—'}</td>
+        <td class="row-actions"><button class="btn sm" onclick="verMunicipio('${m.id}')">Ver solicitudes</button></td>
+      </tr>`;
+    }).join('')}
+  </tbody></table>`;
+}
+function renderMunicipios(){
+  return `<div class="card">
+    <div class="card-h"><div><h3>Municipalidades</h3><div class="sub">Cada municipalidad (Panel 3) con sus solicitudes. Entra a responder desde "Ver solicitudes".</div></div></div>
+    <div class="card-b" style="padding:0">${municipiosTable()}</div>
+  </div>`;
+}
+function verMunicipio(id){ filterMun=id; filterTipo=''; searchQ=''; nav('solicitudes'); }
+
+/* ---------- USUARIOS (crear nivel inferior) ---------- */
+function createTarget(){ return myRole==='jefe' ? 'panel2' : (myRole==='panel2' ? 'panel3' : null); }
+function renderUsuarios(){
+  const tgt = createTarget();
+  if(!tgt) return `<div class="empty"><div class="ico">🔒</div>No tienes permisos para crear usuarios.</div>`;
+  const esMuni = tgt==='panel3';
+  const tgtLabel = esMuni ? 'Municipalidad (Panel 3)' : 'Panel 2';
+  const list = allProfiles.filter(p=>p.role===tgt);
+  const nombreLabel = esMuni ? 'Nombre de la municipalidad' : 'Nombre del usuario';
+  return `
+  <div class="card" style="max-width:720px">
+    <div class="card-h"><div><h3>Crear ${esc(tgtLabel)}</h3>
+      <div class="sub">${esMuni?'Cada municipalidad entra con su propio correo y contraseña y envía solicitudes.':'El Panel 2 gestiona las municipalidades y responde sus solicitudes.'} La contraseña la defines tú y se la entregas.</div></div></div>
+    <div class="card-b">
+      <div class="form-grid">
+        <div class="field full"><label>${nombreLabel} <span class="req">*</span></label>
+          <input type="text" id="u-nombre" placeholder="${esMuni?'Ej: Municipalidad de Ñuñoa':'Ej: Juan Pérez'}"></div>
+        <div class="field"><label>Correo <span class="req">*</span></label>
+          <input type="email" id="u-email" placeholder="correo@ejemplo.com"></div>
+        <div class="field"><label>Contraseña <span class="req">*</span></label>
+          <input type="text" id="u-pass" placeholder="Mínimo 6 caracteres"></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:18px;align-items:center">
+        <button class="btn primary" id="u-crear"><span>➕</span> Crear ${esc(tgtLabel)}</button>
+        <span class="hint" id="u-status"></span>
+      </div>
+      <p class="req-note">La contraseña se muestra en texto para que puedas copiarla y entregarla. El usuario podrá cambiarla luego.</p>
+    </div>
+  </div>
+  <div class="card" style="margin-top:22px">
+    <div class="card-h"><div><h3>${esMuni?'Municipalidades':'Usuarios Panel 2'} existentes</h3><div class="sub">${list.length} en total</div></div></div>
+    <div class="card-b" style="padding:0">
+      ${list.length ? `<table><thead><tr><th>Nombre</th><th>Rol</th></tr></thead><tbody>
+        ${list.map(p=>`<tr><td><b>${esc(p.full_name||'(sin nombre)')}</b></td><td><span class="rolechip ${p.role}">${ROLE_LABEL[p.role]||p.role}</span></td></tr>`).join('')}
+      </tbody></table>` : `<div class="empty"><div class="ico">👥</div>Aún no has creado ${esMuni?'municipalidades':'usuarios Panel 2'}.</div>`}
+    </div>
+  </div>`;
+}
+async function crearUsuario(){
+  const tgt = createTarget(); if(!tgt || !sb) return;
+  const nombre=($('#u-nombre').value||'').trim();
+  const email=($('#u-email').value||'').trim();
+  const pass=$('#u-pass').value||'';
+  const st=$('#u-status');
+  if(!nombre||!email||!pass){ st.style.color='var(--danger)'; st.textContent='Completa nombre, correo y contraseña.'; return; }
+  if(pass.length<6){ st.style.color='var(--danger)'; st.textContent='La contraseña debe tener al menos 6 caracteres.'; return; }
+  const btn=$('#u-crear'); btn.disabled=true; btn.innerHTML='Creando…';
+  let errMsg=null;
+  try{
+    const { data, error } = await sb.functions.invoke('crear-usuario', { body:{ email, password:pass, nombre, rol:tgt } });
+    if(error){ errMsg = (data&&data.error) || error.message || 'Error del servidor'; }
+    else if(data && data.error){ errMsg = data.error; }
+  }catch(e){ errMsg=String(e); }
+  btn.disabled=false; btn.innerHTML='<span>➕</span> Crear';
+  if(errMsg){ st.style.color='var(--danger)'; st.textContent='Error: '+errMsg; return; }
+  st.style.color='var(--ok)'; st.textContent='✓ Cuenta creada correctamente';
+  toast('Cuenta creada');
+  await loadData(); render();
+}
+
 /* ---------- SOLICITUDES ---------- */
-let filterTipo='', searchQ='';
+let filterTipo='', searchQ='', filterMun='';
 function renderSolicitudes(){
+  const esJefeP2=(myRole==='jefe'||myRole==='panel2');
+  const munName = filterMun ? ((municipios.find(m=>m.id===filterMun)||{}).full_name||'') : '';
   return `
   <div class="toolbar">
-    <div class="search"><span class="si">🔎</span><input type="text" id="sq" placeholder="Buscar por folio, placa, solicitante..." value="${esc(searchQ)}"></div>
+    <div class="search"><span class="si">🔎</span><input type="text" id="sq" placeholder="Buscar por folio, municipalidad, tipo..." value="${esc(searchQ)}"></div>
     <button class="chip ${filterTipo===''?'on':''}" data-tipo="">Todos</button>
     <button class="chip ${filterTipo==='Ingreso a servicio'?'on':''}" data-tipo="Ingreso a servicio">Ingresos</button>
     <button class="chip ${filterTipo==='Siniestro'?'on':''}" data-tipo="Siniestro">Siniestros</button>
     <button class="chip ${filterTipo==='Vehículo de reemplazo'?'on':''}" data-tipo="Vehículo de reemplazo">Reemplazos</button>
-    <button class="btn ok" onclick="nav('exportar')"><span>📤</span> Exportar</button>
+    ${filterMun?`<button class="chip on" id="clear-mun">🏛️ ${esc(munName)} ✕</button>`:''}
+    ${(mySections().includes('exportar') && can('exportar')) ? `<button class="btn ok" onclick="nav('exportar')"><span>📤</span> Exportar</button>` : ''}
   </div>
   <div class="card"><div class="card-b" style="padding:0" id="sol-table">${renderSolTable()}</div></div>`;
 }
@@ -417,57 +833,62 @@ function filteredSol(){
   const q=searchQ.toLowerCase();
   return solicitudes.filter(s=>{
     if(filterTipo && s.tipo!==filterTipo) return false;
+    if(filterMun && s.municipio_id!==filterMun) return false;
     if(!q) return true;
-    return [s.folio,s.placa,s.solicitante,s.contacto,s.sucursal,s.descripcion].join(' ').toLowerCase().includes(q);
+    return [s.folio,s.municipio_nombre,s.placa,s.contacto,s.sucursal,s.descripcion,s.tipo].join(' ').toLowerCase().includes(q);
   });
 }
 function renderSolTable(){
+  const esJefeP2=(myRole==='jefe'||myRole==='panel2');
   const list=filteredSol();
-  if(!list.length) return `<div class="empty"><div class="ico">📭</div>No hay solicitudes que coincidan con el filtro.</div>`;
+  if(!list.length) return `<div class="empty"><div class="ico">📭</div>No hay solicitudes que coincidan.</div>`;
   return `<table><thead><tr>
-    <th>Folio</th><th>Tipo</th><th>Placa</th><th>Solicitante</th>
-    <th>F. Solicitud</th><th>F. Ingreso</th><th>F. Notif. entrega</th><th>F. Retiro</th><th>Estado</th><th></th>
+    ${esJefeP2?'<th>Municipalidad</th>':''}<th>Folio</th><th>Tipo</th><th>Placa</th><th>Fecha</th><th>Respuesta</th><th></th>
   </tr></thead><tbody>
-  ${list.map(s=>`<tr>
-    <td><span class="folio">${esc(s.folio)}</span></td>
+  ${list.map(s=>{
+    const pend=(s.resp_estado||'En revisión')==='En revisión';
+    return `<tr>
+    ${esJefeP2?`<td><b>${esc(s.municipio_nombre||'—')}</b></td>`:''}
+    <td><span class="folio">${esc(s.folio||'')}</span></td>
     <td>${tipoTag(s.tipo)}</td>
     <td>${plate(s.placa)}</td>
-    <td>${esc(s.solicitante)}<div class="hint">${esc(s.contacto)}</div></td>
-    <td>${fmtDate(s.fechaSolicitud)}</td>
-    <td>${fmtDate(s.fechaIngresoServicio)}</td>
-    <td>${fmtDate(s.fechaNotificacionEntrega)}</td>
-    <td>${fmtDate(s.fechaRetiro)}</td>
-    <td>${estadoTag(s.estado)}</td>
-    <td class="row-actions"><button class="btn sm" onclick="openDetalle('${s.folio}')">Ver</button></td>
-  </tr>`).join('')}
+    <td>${fmtD(s.fecha_solicitud||s.created_at)}</td>
+    <td>${respTag(s.resp_estado)}</td>
+    <td class="row-actions"><button class="btn sm ${esJefeP2&&pend?'primary':''}" onclick="openDetalle('${s.id}')">${esJefeP2?'Ver / Responder':'Ver'}</button></td>
+  </tr>`;}).join('')}
   </tbody></table>`;
 }
 
 /* ---------- VEHÍCULOS ---------- */
 function renderVehiculos(){
+  const esJefeP2=(myRole==='jefe'||myRole==='panel2');
   return `
   <div class="toolbar">
-    <div class="search"><span class="si">🔎</span><input type="text" id="vq" placeholder="Buscar por placa, marca, modelo..."></div>
-    <button class="btn primary" onclick="openNuevoVehiculo()"><span>➕</span> Registrar vehículo</button>
+    <div class="search"><span class="si">🔎</span><input type="text" id="vq" placeholder="Buscar por placa, marca, municipalidad..."></div>
+    ${esJefeP2 ? `<button class="btn primary" onclick="openNuevoVehiculo()"><span>➕</span> Asignar vehículo</button>` : ''}
   </div>
+  ${!esJefeP2 ? `<div style="background:var(--brand-soft);border:1px solid #bfdbfe;border-radius:9px;padding:10px 13px;font-size:12.5px;color:var(--brand-d);margin-bottom:14px">🏛️ Estos son los vehículos que la plataforma asignó a tu municipalidad. Puedes quitar los que ya no uses.</div>` : ''}
   <div class="card"><div class="card-b" style="padding:0" id="veh-table">${renderVehTable('')}</div></div>`;
 }
 function renderVehTable(q){
+  const esJefeP2=(myRole==='jefe'||myRole==='panel2');
   q=(q||'').toLowerCase();
-  const list=vehiculos.filter(v=>[v.placa,v.marca,v.modelo,v.color].join(' ').toLowerCase().includes(q));
-  if(!list.length) return `<div class="empty"><div class="ico">🚙</div>No hay vehículos registrados que coincidan.</div>`;
-  return `<table><thead><tr><th>Placa patente</th><th>Vehículo</th><th>Año</th><th>Color</th><th>Estado</th><th>Solicitudes</th><th></th></tr></thead><tbody>
+  const list=vehiculos.filter(v=>[v.placa,v.marca,v.modelo,v.color,v.municipio_nombre].join(' ').toLowerCase().includes(q));
+  if(!list.length) return `<div class="empty"><div class="ico">🚙</div>${esJefeP2?'No hay vehículos asignados todavía. Usa "Asignar vehículo".':'Tu municipalidad aún no tiene vehículos asignados.'}</div>`;
+  return `<table><thead><tr>${esJefeP2?'<th>Municipalidad</th>':''}<th>Placa patente</th><th>Vehículo</th><th>Año</th><th>Estado</th><th></th></tr></thead><tbody>
   ${list.map(v=>{
-    const n=solicitudes.filter(s=>s.placa===v.placa).length;
     const em={'Disponible':'s-cerrada','Asignado':'s-servicio','En taller':'s-entregado'}[v.estado]||'s-solicitada';
+    const puedeQuitar = esJefeP2 || v.municipio_id===session?.user?.id;
     return `<tr>
+      ${esJefeP2?`<td><b>${esc(v.municipio_nombre||'—')}</b></td>`:''}
       <td>${plate(v.placa)}</td>
       <td><b>${esc(v.marca)} ${esc(v.modelo)}</b></td>
-      <td>${v.anio}</td>
-      <td>${esc(v.color)}</td>
+      <td>${esc(v.anio||'—')}</td>
       <td><span class="tag ${em}">${esc(v.estado)}</span></td>
-      <td><b>${n}</b> registro${n!==1?'s':''}</td>
-      <td class="row-actions"><button class="btn sm" onclick="openVehiculo('${esc(v.placa)}')">Historial</button></td>
+      <td class="row-actions">
+        <button class="btn sm" onclick="openVehiculo('${v.id}')">Historial</button>
+        ${puedeQuitar?`<button class="btn sm danger" onclick="eliminarVeh('${v.id}')">Quitar</button>`:''}
+      </td>
     </tr>`;
   }).join('')}
   </tbody></table>`;
@@ -496,14 +917,13 @@ function renderNueva(){
       </div>
 
       <div class="section-title">Datos de la solicitud</div>
+      <div style="background:var(--brand-soft);border:1px solid #bfdbfe;border-radius:9px;padding:10px 13px;font-size:12.5px;color:var(--brand-d);margin-bottom:16px">
+        🏛️ Esta solicitud se enviará como <b>${esc(myName)}</b> a la plataforma para su revisión.
+      </div>
       <div class="form-grid">
         <div class="field">
-          <label>Solicitante / mandante <span class="req">*</span></label>
-          <input type="text" id="f-solicitante" placeholder="Ej: Aseguradora Andes S.A.">
-        </div>
-        <div class="field">
           <label>Contacto</label>
-          <input type="text" id="f-contacto" placeholder="Nombre del contacto">
+          <input type="text" id="f-contacto" placeholder="Nombre del contacto en la municipalidad">
         </div>
         <div class="field">
           <label>Sucursal / ubicación</label>
@@ -511,24 +931,24 @@ function renderNueva(){
         </div>
         <div class="field">
           <label>Placa patente del vehículo</label>
-          <select id="f-placa">
-            <option value="">— Sin asignar / se asignará después —</option>
-            ${dispVeh.map(v=>`<option value="${esc(v.placa)}">${esc(v.placa)} · ${esc(v.marca)} ${esc(v.modelo)} (${esc(v.estado)})</option>`).join('')}
-          </select>
-          <span class="hint">Puedes registrar la placa ahora o al asignar el vehículo.</span>
-        </div>
-        <div class="field full">
-          <label>Descripción / detalle</label>
-          <textarea id="f-desc" placeholder="Describe el motivo de la solicitud, condiciones del vehículo, etc."></textarea>
+          ${vehiculos.length ? `<select id="f-placa">
+            <option value="">— Sin asignar —</option>
+            ${vehiculos.map(v=>`<option value="${esc(v.placa)}">${esc(v.placa)} · ${esc(v.marca)} ${esc(v.modelo)}</option>`).join('')}
+          </select><span class="hint">Elige uno de los vehículos asignados a tu municipalidad.</span>`
+          : `<input type="text" id="f-placa" placeholder="Ej: GKRT-45" style="text-transform:uppercase"><span class="hint">Aún no tienes vehículos asignados; puedes escribir la placa.</span>`}
         </div>
         <div class="field">
           <label>Fecha de solicitud <span class="req">*</span></label>
           <input type="date" id="f-fsolicitud" value="${todayISO()}">
         </div>
+        <div class="field full">
+          <label>Descripción / detalle <span class="req">*</span></label>
+          <textarea id="f-desc" placeholder="Describe el motivo de la solicitud, condiciones del vehículo, etc."></textarea>
+        </div>
       </div>
-      <p class="req-note">Los campos marcados con <span class="req">*</span> son obligatorios. La fecha de solicitud queda registrada como primera fecha de control.</p>
+      <p class="req-note">Los campos marcados con <span class="req">*</span> son obligatorios. Al enviarla, la plataforma la recibirá y te responderá con un estado y comentario.</p>
       <div style="display:flex;gap:10px;margin-top:18px">
-        <button class="btn primary" onclick="guardarNueva()"><span>💾</span> Registrar solicitud</button>
+        <button class="btn primary" onclick="guardarNueva()"><span>📤</span> Enviar solicitud</button>
         <button class="btn" onclick="nav('panel')">Cancelar</button>
       </div>
     </div>
@@ -538,6 +958,9 @@ function renderNueva(){
 /* ---------- EXPORTAR ---------- */
 function renderExportar(){
   const preview = solicitudes.slice(0,3);
+  if(!can('exportar')){
+    return `<div class="card"><div class="card-b"><div class="empty"><div class="ico">🔒</div>No tienes permiso para exportar datos. Puedes ver la información en las demás secciones, pero la descarga está deshabilitada por tu nivel de acceso.</div></div></div>`;
+  }
   return `
   <div class="grid-2">
     <div class="card">
@@ -562,8 +985,9 @@ function renderExportar(){
     <div class="card">
       <div class="card-h"><div><h3>Columnas incluidas</h3><div class="sub">Estructura del archivo de solicitudes</div></div></div>
       <div class="card-b">
-        ${['Folio','Tipo de solicitud','Placa patente','Solicitante','Contacto','Sucursal',
-           'Fecha de solicitud','Fecha de ingreso a servicio','Fecha de notificación de entrega','Fecha de retiro','Estado','Descripción']
+        ${['Folio','Municipalidad','Tipo de solicitud','Placa patente','Contacto','Sucursal',
+           'Fecha de solicitud','Fecha de ingreso a servicio','Fecha de notificación de entrega','Fecha de retiro',
+           'Estado de respuesta','Comentario','Descripción']
           .map(c=>`<div class="kv"><span class="k">${esc(c)}</span><span class="v" style="color:var(--ok)">✓</span></div>`).join('')}
       </div>
     </div>
@@ -571,11 +995,10 @@ function renderExportar(){
   <div class="card" style="margin-top:22px">
     <div class="card-h"><div><h3>Vista previa</h3><div class="sub">Primeros registros de la exportación</div></div></div>
     <div class="card-b" style="padding:0;overflow:auto">
-      <table><thead><tr><th>Folio</th><th>Tipo</th><th>Placa</th><th>F.Sol.</th><th>F.Ing.</th><th>F.Notif.</th><th>F.Ret.</th><th>Estado</th></tr></thead><tbody>
+      <table><thead><tr><th>Folio</th><th>Municipalidad</th><th>Tipo</th><th>Placa</th><th>Fecha</th><th>Respuesta</th></tr></thead><tbody>
       ${preview.map(s=>`<tr>
-        <td><span class="folio">${esc(s.folio)}</span></td><td>${tipoTag(s.tipo)}</td><td>${plate(s.placa)}</td>
-        <td>${fmtDate(s.fechaSolicitud)}</td><td>${fmtDate(s.fechaIngresoServicio)}</td>
-        <td>${fmtDate(s.fechaNotificacionEntrega)}</td><td>${fmtDate(s.fechaRetiro)}</td><td>${estadoTag(s.estado)}</td>
+        <td><span class="folio">${esc(s.folio||'')}</span></td><td>${esc(s.municipio_nombre||'—')}</td><td>${tipoTag(s.tipo)}</td><td>${plate(s.placa)}</td>
+        <td>${fmtD(s.fecha_solicitud||s.created_at)}</td><td>${respTag(s.resp_estado)}</td>
       </tr>`).join('')}
       </tbody></table>
     </div>
@@ -616,118 +1039,150 @@ function renderRequisitos(){
     <div class="card-b" style="display:flex;gap:16px;align-items:center">
       <div style="font-size:34px">📌</div>
       <div>
-        <div style="font-weight:700;margin-bottom:3px">Nota sobre el prototipo</div>
-        <div style="color:var(--muted);font-size:13px">Este es un prototipo funcional de demostración. Los datos se guardan en memoria durante la sesión (no hay backend). Para producción se recomienda una base de datos persistente, autenticación de usuarios y control de accesos por rol.</div>
+        <div style="font-weight:700;margin-bottom:3px">Plataforma en producción</div>
+        <div style="color:var(--muted);font-size:13px">Los datos se guardan en una base de datos real (Supabase) con autenticación por usuario y control de accesos por nivel. Las municipalidades envían solicitudes y la plataforma responde con estado y comentario, todo sincronizado en tiempo real.</div>
       </div>
     </div>
   </div>`;
 }
 
 /* ============================================================
-   DETALLE DE SOLICITUD (modal) + registro de fechas de control
+   DETALLE DE SOLICITUD (modal) + respuesta del Panel 2
    ============================================================ */
-function openDetalle(folio){
-  const s=solicitudes.find(x=>x.folio===folio); if(!s) return;
+function openDetalle(id){
+  const s=solicitudes.find(x=>x.id===id); if(!s) return;
+  const esJefeP2=(myRole==='jefe'||myRole==='panel2');
+  const puedeResponder = esJefeP2 && can('editar');
+  const puedeFechas = can('editar');
+  const est = s.resp_estado||'En revisión';
   const steps=[
-    {lab:'Solicitud', date:s.fechaSolicitud, key:'fechaSolicitud'},
-    {lab:'Ingreso a servicio', date:s.fechaIngresoServicio, key:'fechaIngresoServicio'},
-    {lab:'Notif. entrega', date:s.fechaNotificacionEntrega, key:'fechaNotificacionEntrega'},
-    {lab:'Retiro vehículo', date:s.fechaRetiro, key:'fechaRetiro'},
+    {lab:'Solicitud', date:s.fecha_solicitud},
+    {lab:'Ingreso a servicio', date:s.fecha_ingreso_servicio},
+    {lab:'Notif. entrega', date:s.fecha_notificacion_entrega},
+    {lab:'Retiro vehículo', date:s.fecha_retiro},
   ];
   $('#modal').innerHTML=`
     <div class="modal-h">
       ${tipoTag(s.tipo)}
-      <h3>${esc(s.folio)}</h3>
+      <h3>${esc(s.folio||'Solicitud')}</h3>
       <button class="x" onclick="closeModal()">×</button>
     </div>
     <div class="modal-b">
-      <div class="section-title" style="margin-top:0">Fechas de control</div>
+      <div class="section-title" style="margin-top:0">Datos de la solicitud</div>
+      <div class="kv"><span class="k">Municipalidad</span><span class="v">${esc(s.municipio_nombre||'—')}</span></div>
+      <div class="kv"><span class="k">Tipo</span><span class="v">${esc(s.tipo||'—')}</span></div>
+      <div class="kv"><span class="k">Placa patente</span><span class="v">${s.placa?esc(s.placa):'—'}</span></div>
+      <div class="kv"><span class="k">Sucursal / ubicación</span><span class="v">${esc(s.sucursal||'—')}</span></div>
+      <div class="kv"><span class="k">Contacto</span><span class="v">${esc(s.contacto||'—')}</span></div>
+      <div class="kv"><span class="k">Descripción</span><span class="v" style="max-width:60%;text-align:right">${esc(s.descripcion||'—')}</span></div>
+
+      <div class="section-title">Fechas de control</div>
       <div class="timeline">
         ${steps.map(st=>`<div class="tl-step ${st.date?'done':'pending'}"><div class="node"></div>
-          <div class="tl-lab">${st.lab}</div><div class="tl-date">${st.date?fmtDate(st.date):'Pendiente'}</div></div>`).join('')}
+          <div class="tl-lab">${st.lab}</div><div class="tl-date">${st.date?fmtD(st.date):'Pendiente'}</div></div>`).join('')}
       </div>
+      ${puedeFechas?`
+      <div class="form-grid" style="margin-top:14px">
+        <div class="field"><label>Fecha de solicitud</label><input type="date" id="d-fsol" value="${(s.fecha_solicitud||'').slice(0,10)}"></div>
+        <div class="field"><label>Fecha de ingreso a servicio</label><input type="date" id="d-fing" value="${(s.fecha_ingreso_servicio||'').slice(0,10)}"></div>
+        <div class="field"><label>Fecha de notificación de entrega</label><input type="date" id="d-fnot" value="${(s.fecha_notificacion_entrega||'').slice(0,10)}"></div>
+        <div class="field"><label>Fecha de retiro del vehículo</label><input type="date" id="d-fret" value="${(s.fecha_retiro||'').slice(0,10)}"></div>
+      </div>
+      <div style="margin-top:12px"><button class="btn ok" onclick="guardarFechas('${s.id}')"><span>💾</span> Guardar fechas de control</button></div>`:''}
 
-      <div class="section-title">Registrar / actualizar fechas</div>
+      <div class="section-title">Respuesta de la plataforma</div>
+      <div class="kv"><span class="k">Estado</span><span class="v">${respTag(est)}</span></div>
+      ${s.resp_comentario?`<div class="kv"><span class="k">Comentario</span><span class="v" style="max-width:60%;text-align:right">${esc(s.resp_comentario)}</span></div>`:''}
+      ${(!esJefeP2 && est==='En revisión')?`<div class="hint" style="margin-top:6px">Tu solicitud está en revisión. Aquí verás el estado y el comentario cuando la plataforma responda.</div>`:''}
+
+      ${puedeResponder?`
+      <div class="section-title">Responder a la municipalidad</div>
       <div class="form-grid">
-        <div class="field"><label>Fecha de solicitud</label><input type="date" id="d-fsol" value="${s.fechaSolicitud||''}"></div>
-        <div class="field"><label>Fecha de ingreso a servicio</label><input type="date" id="d-fing" value="${s.fechaIngresoServicio||''}"></div>
-        <div class="field"><label>Fecha de notificación de entrega</label><input type="date" id="d-fnot" value="${s.fechaNotificacionEntrega||''}"></div>
-        <div class="field"><label>Fecha de retiro del vehículo</label><input type="date" id="d-fret" value="${s.fechaRetiro||''}"></div>
-        <div class="field"><label>Placa patente asignada</label>
-          <select id="d-placa">
-            <option value="">— Sin asignar —</option>
-            ${vehiculos.map(v=>`<option value="${esc(v.placa)}" ${v.placa===s.placa?'selected':''}>${esc(v.placa)} · ${esc(v.marca)} ${esc(v.modelo)}</option>`).join('')}
-          </select></div>
         <div class="field"><label>Estado</label>
-          <select id="d-estado">${ESTADOS.map(e=>`<option ${e===s.estado?'selected':''}>${e}</option>`).join('')}</select></div>
-      </div>
-
-      <div class="section-title">Datos del registro</div>
-      <div class="kv"><span class="k">Solicitante</span><span class="v">${esc(s.solicitante)}</span></div>
-      <div class="kv"><span class="k">Contacto</span><span class="v">${esc(s.contacto||'—')}</span></div>
-      <div class="kv"><span class="k">Sucursal</span><span class="v">${esc(s.sucursal||'—')}</span></div>
-      <div class="kv"><span class="k">Descripción</span><span class="v" style="max-width:60%;text-align:right">${esc(s.descripcion||'—')}</span></div>
+          <select id="r-estado">${RESP_ESTADOS.map(e=>`<option ${e===est?'selected':''}>${e}</option>`).join('')}</select></div>
+        <div class="field full"><label>Comentario / feedback</label>
+          <textarea id="r-com" placeholder="Escribe la respuesta para la municipalidad...">${esc(s.resp_comentario||'')}</textarea></div>
+      </div>`:''}
     </div>
     <div class="modal-f">
-      <button class="btn danger" onclick="eliminarSol('${s.folio}')">Eliminar</button>
+      ${can('eliminar')?`<button class="btn danger" onclick="eliminarSol('${s.id}')">Eliminar</button>`:''}
       <button class="btn" onclick="closeModal()">Cerrar</button>
-      <button class="btn primary" onclick="guardarDetalle('${s.folio}')"><span>💾</span> Guardar cambios</button>
+      ${puedeResponder?`<button class="btn primary" onclick="guardarRespuesta('${s.id}')"><span>💾</span> Enviar respuesta</button>`:''}
     </div>`;
   $('#overlay').classList.add('show');
 }
-function guardarDetalle(folio){
-  const s=solicitudes.find(x=>x.folio===folio); if(!s) return;
-  s.fechaSolicitud=$('#d-fsol').value;
-  s.fechaIngresoServicio=$('#d-fing').value;
-  s.fechaNotificacionEntrega=$('#d-fnot').value;
-  s.fechaRetiro=$('#d-fret').value;
-  s.placa=$('#d-placa').value;
-  s.estado=$('#d-estado').value;
-  closeModal(); render(); toast('Solicitud '+folio+' actualizada');
+async function guardarFechas(id){
+  if(!can('editar')){ toast('No tienes permiso para registrar fechas'); return; }
+  const patch={
+    fecha_solicitud: $('#d-fsol').value || null,
+    fecha_ingreso_servicio: $('#d-fing').value || null,
+    fecha_notificacion_entrega: $('#d-fnot').value || null,
+    fecha_retiro: $('#d-fret').value || null,
+  };
+  const {error}=await sb.from('solicitudes').update(patch).eq('id',id);
+  if(error){ toast('Error: '+error.message); return; }
+  await loadData(); closeModal(); render(); toast('Fechas de control actualizadas');
 }
-function eliminarSol(folio){
-  solicitudes=solicitudes.filter(x=>x.folio!==folio);
-  closeModal(); render(); toast('Solicitud eliminada');
+async function guardarRespuesta(id){
+  if(!((myRole==='jefe'||myRole==='panel2') && can('editar'))){ toast('No tienes permiso para responder'); return; }
+  const estado=$('#r-estado').value; const com=($('#r-com').value||'').trim();
+  const {error}=await sb.from('solicitudes').update({resp_estado:estado, resp_comentario:com, respondido_por:session.user.id, respondido_at:new Date().toISOString()}).eq('id',id);
+  if(error){ toast('Error: '+error.message); return; }
+  await loadData(); closeModal(); render(); toast('Respuesta enviada a la municipalidad');
+}
+async function eliminarSol(id){
+  if(!can('eliminar')){ toast('No tienes permiso para eliminar'); return; }
+  const {error}=await sb.from('solicitudes').delete().eq('id',id);
+  if(error){ toast('Error: '+error.message); return; }
+  await loadData(); closeModal(); render(); toast('Solicitud eliminada');
 }
 
 /* ---------- Detalle vehículo ---------- */
-function openVehiculo(placa){
-  const v=vehiculos.find(x=>x.placa===placa); if(!v) return;
-  const hist=solicitudes.filter(s=>s.placa===placa).sort((a,b)=>(b.fechaSolicitud||'').localeCompare(a.fechaSolicitud||''));
+function openVehiculo(id){
+  const v=vehiculos.find(x=>x.id===id); if(!v) return;
+  const esJefeP2=(myRole==='jefe'||myRole==='panel2');
+  const hist=solicitudes.filter(s=>s.placa===v.placa).sort((a,b)=>((b.fecha_solicitud||'')+'').localeCompare((a.fecha_solicitud||'')+''));
+  const puedeQuitar = esJefeP2 || v.municipio_id===session?.user?.id;
   $('#modal').innerHTML=`
     <div class="modal-h"><span class="plate">${esc(v.placa)}</span><h3 style="margin-left:4px">${esc(v.marca)} ${esc(v.modelo)}</h3><button class="x" onclick="closeModal()">×</button></div>
     <div class="modal-b">
       <div class="grid-3" style="gap:12px">
-        <div class="kpi" style="box-shadow:none;padding:14px"><div class="lab">Año</div><div style="font-weight:700;font-size:16px">${v.anio}</div></div>
-        <div class="kpi" style="box-shadow:none;padding:14px"><div class="lab">Color</div><div style="font-weight:700;font-size:16px">${esc(v.color)}</div></div>
+        <div class="kpi" style="box-shadow:none;padding:14px"><div class="lab">Año</div><div style="font-weight:700;font-size:16px">${esc(v.anio||'—')}</div></div>
+        <div class="kpi" style="box-shadow:none;padding:14px"><div class="lab">Color</div><div style="font-weight:700;font-size:16px">${esc(v.color||'—')}</div></div>
         <div class="kpi" style="box-shadow:none;padding:14px"><div class="lab">Estado</div><div style="font-weight:700;font-size:16px">${esc(v.estado)}</div></div>
       </div>
+      <div class="kv" style="margin-top:12px"><span class="k">Municipalidad</span><span class="v">${esc(v.municipio_nombre||'—')}</span></div>
       <div class="section-title">Historial de la placa patente <span style="color:var(--muted2)">(${hist.length})</span></div>
       ${hist.length?`<ul class="veh-hist" style="list-style:none;padding:0;margin:0">
         ${hist.map(s=>`<li>
-          <span class="mini-date">${fmtDate(s.fechaSolicitud)}</span>
-          <div style="flex:1">${tipoTag(s.tipo)} <span class="folio">${esc(s.folio)}</span><div class="hint">${esc(s.descripcion||'')}</div></div>
-          ${estadoTag(s.estado)}
+          <span class="mini-date">${fmtD(s.fecha_solicitud||s.created_at)}</span>
+          <div style="flex:1">${tipoTag(s.tipo)} <span class="folio">${esc(s.folio||'')}</span><div class="hint">${esc(s.descripcion||'')}</div></div>
+          ${respTag(s.resp_estado)}
         </li>`).join('')}
       </ul>`:`<div class="empty"><div class="ico">📭</div>Sin solicitudes asociadas.</div>`}
     </div>
     <div class="modal-f">
-      <button class="btn danger" onclick="eliminarVeh('${esc(v.placa)}')">Eliminar</button>
+      ${puedeQuitar ? `<button class="btn danger" onclick="eliminarVeh('${v.id}')">Quitar vehículo</button>` : ''}
       <button class="btn primary" onclick="closeModal()">Cerrar</button>
     </div>`;
   $('#overlay').classList.add('show');
 }
-function eliminarVeh(placa){
-  vehiculos=vehiculos.filter(v=>v.placa!==placa);
-  closeModal(); render(); toast('Vehículo eliminado');
+async function eliminarVeh(id){
+  const {error}=await sb.from('vehiculos').delete().eq('id',id);
+  if(error){ toast('Error: '+error.message); return; }
+  await loadData(); closeModal(); render(); toast('Vehículo quitado');
 }
 
-/* ---------- Nuevo vehículo (modal) ---------- */
+/* ---------- Asignar vehículo (modal, solo Jefe / Panel 2) ---------- */
 function openNuevoVehiculo(){
+  if(!(myRole==='jefe'||myRole==='panel2')){ toast('Solo el Panel 2 asigna vehículos'); return; }
   $('#modal').innerHTML=`
-    <div class="modal-h"><h3>Registrar vehículo</h3><button class="x" onclick="closeModal()">×</button></div>
+    <div class="modal-h"><h3>Asignar vehículo a una municipalidad</h3><button class="x" onclick="closeModal()">×</button></div>
     <div class="modal-b">
       <div class="form-grid">
+        <div class="field full"><label>Municipalidad <span class="req">*</span></label>
+          <select id="v-muni"><option value="">— Selecciona la municipalidad —</option>
+            ${municipios.map(m=>`<option value="${m.id}">${esc(m.full_name||m.id)}</option>`).join('')}</select></div>
         <div class="field"><label>Placa patente <span class="req">*</span></label><input type="text" id="v-placa" placeholder="Ej: GKRT-45" style="text-transform:uppercase"></div>
         <div class="field"><label>Marca</label><input type="text" id="v-marca" placeholder="Ej: Toyota"></div>
         <div class="field"><label>Modelo</label><input type="text" id="v-modelo" placeholder="Ej: Corolla"></div>
@@ -735,36 +1190,52 @@ function openNuevoVehiculo(){
         <div class="field"><label>Color</label><input type="text" id="v-color" placeholder="Ej: Blanco"></div>
         <div class="field"><label>Estado</label><select id="v-estado"><option>Disponible</option><option>Asignado</option><option>En taller</option></select></div>
       </div>
+      ${municipios.length?'':'<p class="req-note">Primero crea una municipalidad en la sección "Usuarios".</p>'}
     </div>
     <div class="modal-f">
       <button class="btn" onclick="closeModal()">Cancelar</button>
-      <button class="btn primary" onclick="guardarVehiculo()"><span>💾</span> Registrar</button>
+      <button class="btn primary" onclick="guardarVehiculo()"><span>💾</span> Asignar vehículo</button>
     </div>`;
   $('#overlay').classList.add('show');
 }
-function guardarVehiculo(){
+async function guardarVehiculo(){
+  if(!(myRole==='jefe'||myRole==='panel2')){ toast('No autorizado'); return; }
+  const muniId=$('#v-muni').value;
+  if(!muniId){ toast('Selecciona la municipalidad'); return; }
   const placa=($('#v-placa').value||'').trim().toUpperCase();
   if(!placa){ toast('Ingresa la placa patente'); return; }
-  if(vehiculos.some(v=>v.placa===placa)){ toast('Esa placa ya está registrada'); return; }
-  vehiculos.push({placa, marca:$('#v-marca').value||'—', modelo:$('#v-modelo').value||'—',
-    anio:$('#v-anio').value||'—', color:$('#v-color').value||'—', estado:$('#v-estado').value});
-  closeModal(); render(); toast('Vehículo '+placa+' registrado');
+  const muni=municipios.find(m=>m.id===muniId);
+  const {error}=await sb.from('vehiculos').insert({
+    placa, marca:$('#v-marca').value||'', modelo:$('#v-modelo').value||'',
+    anio:$('#v-anio').value||'', color:$('#v-color').value||'', estado:$('#v-estado').value,
+    municipio_id:muniId, municipio_nombre:muni?.full_name||''
+  });
+  if(error){ toast('Error: '+error.message); return; }
+  await loadData(); closeModal(); render(); toast('Vehículo '+placa+' asignado a '+(muni?.full_name||'la municipalidad'));
 }
 
 /* ---------- Guardar nueva solicitud ---------- */
-function guardarNueva(){
+async function guardarNueva(){
+  if(!can('crear')){ toast('No tienes permiso para crear'); return; }
   const tipo=(document.querySelector('input[name="tipo"]:checked')||{}).value;
-  const solicitante=($('#f-solicitante').value||'').trim();
-  if(!solicitante){ toast('Ingresa el solicitante'); $('#f-solicitante').focus(); return; }
+  const desc=($('#f-desc').value||'').trim();
+  if(!desc){ toast('Describe la solicitud'); $('#f-desc').focus(); return; }
   const fsol=$('#f-fsolicitud').value||todayISO();
-  const folio='SOL-'+new Date(fsol+'T00:00:00').getFullYear()+'-'+String(folioSeq++).padStart(4,'0');
-  solicitudes.unshift({
-    folio, tipo, placa:$('#f-placa').value||'',
-    solicitante, contacto:$('#f-contacto').value||'', sucursal:$('#f-sucursal').value||'',
-    descripcion:$('#f-desc').value||'', estado:'Solicitada',
-    fechaSolicitud:fsol, fechaIngresoServicio:'', fechaNotificacionEntrega:'', fechaRetiro:''
+  const folio='SOL-'+new Date(fsol+'T00:00:00').getFullYear()+'-'+String(Math.floor(Math.random()*9000)+1000);
+  const {error}=await sb.from('solicitudes').insert({
+    folio, tipo,
+    municipio_id: session.user.id,
+    municipio_nombre: myName,
+    placa:($('#f-placa').value||'').trim().toUpperCase(),
+    contacto:$('#f-contacto').value||'',
+    sucursal:$('#f-sucursal').value||'',
+    descripcion:desc,
+    fecha_solicitud:fsol,
+    resp_estado:'En revisión'
   });
-  toast('Solicitud '+folio+' registrada');
+  if(error){ toast('Error: '+error.message); return; }
+  await loadData();
+  toast('Solicitud '+folio+' enviada');
   nav('solicitudes');
 }
 function openNueva(){ nav('nueva'); }
@@ -773,6 +1244,7 @@ function openNueva(){ nav('nueva'); }
    EXPORTACIÓN (extracción de base de datos)
    ============================================================ */
 function download(filename, content, mime){
+  if(!can('exportar')){ toast('No tienes permiso para exportar'); return; }
   const blob=new Blob([content],{type:mime});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click();
@@ -780,10 +1252,12 @@ function download(filename, content, mime){
 }
 function csvCell(v){ v=(v??'').toString(); return /[",;\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
 function exportCSV(){
-  const head=['Folio','Tipo de solicitud','Placa patente','Solicitante','Contacto','Sucursal',
-    'Fecha de solicitud','Fecha de ingreso a servicio','Fecha de notificacion de entrega','Fecha de retiro','Estado','Descripcion'];
-  const rows=solicitudes.map(s=>[s.folio,s.tipo,s.placa,s.solicitante,s.contacto,s.sucursal,
-    s.fechaSolicitud,s.fechaIngresoServicio,s.fechaNotificacionEntrega,s.fechaRetiro,s.estado,s.descripcion].map(csvCell).join(';'));
+  const head=['Folio','Municipalidad','Tipo de solicitud','Placa patente','Contacto','Sucursal',
+    'Fecha de solicitud','Fecha de ingreso a servicio','Fecha de notificacion de entrega','Fecha de retiro',
+    'Estado de respuesta','Comentario','Descripcion'];
+  const rows=solicitudes.map(s=>[s.folio,s.municipio_nombre,s.tipo,s.placa,s.contacto,s.sucursal,
+    (s.fecha_solicitud||''),(s.fecha_ingreso_servicio||''),(s.fecha_notificacion_entrega||''),(s.fecha_retiro||''),
+    (s.resp_estado||'En revisión'),s.resp_comentario,s.descripcion].map(csvCell).join(';'));
   const csv='﻿'+[head.join(';'),...rows].join('\n');
   download('solicitudes_'+todayISO()+'.csv', csv, 'text/csv;charset=utf-8');
   toast('Base de datos exportada ('+solicitudes.length+' registros)');
@@ -813,6 +1287,7 @@ function attachViewHandlers(){
     const sq=$('#sq'); if(sq){ sq.oninput=e=>{searchQ=e.target.value; $('#sol-table').innerHTML=renderSolTable();};
       sq.focus(); sq.setSelectionRange(sq.value.length,sq.value.length); }
     document.querySelectorAll('[data-tipo]').forEach(b=>b.onclick=()=>{filterTipo=b.dataset.tipo; render();});
+    const cm=$('#clear-mun'); if(cm) cm.onclick=()=>{ filterMun=''; render(); };
   }
   if(currentView==='vehiculos'){
     const vq=$('#vq'); if(vq) vq.oninput=e=>{ $('#veh-table').innerHTML=renderVehTable(e.target.value); };
@@ -828,13 +1303,42 @@ function attachViewHandlers(){
       upd();
     });
   }
+  if(currentView==='accesos'){
+    document.querySelectorAll('#perm-list-sec .perm-item, #perm-list-act .perm-item').forEach(el=>{
+      if(el.classList.contains('locked')) return;
+      el.onclick=()=>el.classList.toggle('on');
+    });
+    const sv=$('#perm-save'); if(sv) sv.onclick=guardarAccesos;
+  }
+  if(currentView==='usuarios'){
+    const uc=$('#u-crear'); if(uc) uc.onclick=crearUsuario;
+  }
 }
 function closeModal(){ $('#overlay').classList.remove('show'); }
 $('#overlay').addEventListener('click',e=>{ if(e.target.id==='overlay') closeModal(); });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
 
-/* INIT */
-render();
+/* ============================================================
+   INIT — flujo de sesión
+   ============================================================ */
+document.getElementById('auth-form').addEventListener('submit', doLogin);
+document.getElementById('btn-logout').addEventListener('click', doLogout);
+
+(async function init(){
+  if(!sb){
+    // Sin conexión configurada: mostrar aviso en la pantalla de login
+    authErr('La plataforma todavía no está conectada a Supabase. Falta configurar la URL y la anon key.');
+    return;
+  }
+  const {data:{session:s}} = await sb.auth.getSession();
+  if(s){ session = s; await startApp(); }
+  // Reacciona a cambios de sesión (login / logout en otra pestaña)
+  sb.auth.onAuthStateChange(async (_event, s2)=>{
+    if(s2 && (!session || session.user.id !== s2.user.id)){
+      session = s2; await startApp();
+    }
+  });
+})();
 </script>
 </body>
 </html>
