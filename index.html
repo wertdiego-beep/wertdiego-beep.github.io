@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vértix — Plataformas</title>
+<meta name="description" content="Acceso directo a las plataformas Vértix: SOS24, Plataforma de Vehículos y Estamos Contigo.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#081B33;
+    --bg2:#0B2545;
+    --card:#0F2D52;
+    --card-hover:#133864;
+    --line:rgba(255,255,255,.08);
+    --text:#EAF1FA;
+    --muted:#9FB3CC;
+    --sos:#FF5A5F;
+    --veh:#33C6FF;
+    --ec:#9B7BFF;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    background:radial-gradient(1200px 600px at 80% -10%,rgba(51,198,255,.10) 0%,transparent 60%),linear-gradient(160deg,var(--bg2) 0%,var(--bg) 100%);
+    color:var(--text);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+  }
+  .wrap{width:min(960px,92%);margin:0 auto;flex:1}
+  header{padding:56px 0 8px}
+  .logo{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:15px;
+    letter-spacing:.35em;
+    color:var(--muted);
+    text-transform:uppercase;
+  }
+  h1{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:clamp(30px,5vw,44px);
+    font-weight:700;
+    margin-top:14px;
+    letter-spacing:-.01em;
+  }
+  .sub{color:var(--muted);margin-top:10px;font-size:16px;max-width:520px;line-height:1.6}
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(270px,1fr));
+    gap:18px;
+    padding:40px 0 24px;
+  }
+  .card{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    background:linear-gradient(180deg,var(--card) 0%,rgba(15,45,82,.55) 100%);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:26px 24px 22px;
+    text-decoration:none;
+    color:var(--text);
+    transition:transform .18s ease,border-color .18s ease,background .18s ease;
+    position:relative;
+    overflow:hidden;
+  }
+  .card::before{
+    content:"";
+    position:absolute;
+    inset:0 0 auto 0;
+    height:3px;
+    background:var(--accent);
+    opacity:.9;
+  }
+  .card:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.2);background:var(--card-hover)}
+  .mark{
+    width:46px;height:46px;
+    border-radius:12px;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;font-size:19px;
+    background:color-mix(in srgb,var(--accent) 16%,transparent);
+    color:var(--accent);
+    border:1px solid color-mix(in srgb,var(--accent) 35%,transparent);
+  }
+  .tag{
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--accent);
+  }
+  .card h2{font-family:'Space Grotesk',sans-serif;font-size:21px;font-weight:700;margin-top:2px}
+  .card p{color:var(--muted);font-size:14px;line-height:1.6;flex:1}
+  .open{
+    font-size:14px;font-weight:600;
+    color:var(--accent);
+    display:flex;align-items:center;gap:6px;
+  }
+  .open::after{content:"→";transition:transform .18s ease}
+  .card:hover .open::after{transform:translateX(4px)}
+  footer{
+    border-top:1px solid var(--line);
+    padding:22px 0 30px;
+    margin-top:24px;
+  }
+  footer .wrap{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:13px}
+  footer a{color:var(--muted);text-decoration:none}
+  footer a:hover{color:var(--text)}
+  @media (max-width:560px){header{padding-top:42px}}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo">Vértix</div>
+      <h1>Plataformas</h1>
+      <p class="sub">Acceso directo a las plataformas en desarrollo. Selecciona una para abrirla.</p>
+    </header>
+
+    <nav class="grid">
+      <a class="card" style="--accent:var(--sos)" href="sos24.html">
+        <div class="mark">24</div>
+        <div>
+          <div class="tag">Seguridad ciudadana</div>
+          <h2>SOS24</h2>
+        </div>
+        <p>Seguridad y monitoreo: central de monitoreo, botón de pánico, alarmas comunitarias y app para vecinos.</p>
+        <span class="open">Abrir plataforma</span>
+      </a>
+
+      <a class="card" style="--accent:var(--veh)" href="vehiculos.html">
+        <div class="mark">V</div>
+        <div>
+          <div class="tag">Gestión de flota</div>
+          <h2>Plataforma de Vehículos</h2>
+        </div>
+        <p>Plataforma de control para el servicio de vehículos de reemplazo: seguimiento, estados y operación diaria.</p>
+        <span class="open">Abrir plataforma</span>
+      </a>
+
+      <a class="card" style="--accent:var(--ec)" href="https://wertdiego-beep.github.io/estamos-contigo/">
+        <div class="mark">EC</div>
+        <div>
+          <div class="tag">Gestión de casos</div>
+          <h2>Estamos Contigo</h2>
+        </div>
+        <p>Plataforma de gestión de casos para la Defensoría a Víctimas de Delitos Violentos: ingreso, seguimiento e informes.</p>
+        <span class="open">Abrir plataforma</span>
+      </a>
+    </nav>
+  </div>
+
+  <footer>
+    <div class="wrap">
+      <span>Vértix · Chile</span>
+      <a href="mailto:wertdiego@gmail.com">wertdiego@gmail.com</a>
+    </div>
+  </footer>
+</body>
+</html>

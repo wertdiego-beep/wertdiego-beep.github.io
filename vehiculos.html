@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plataforma de Control — Servicio de Vehículos de Reemplazo</title>
+<style>
+  :root{
+    --bg:#0f172a; --bg2:#1e293b; --panel:#ffffff; --panel-2:#f8fafc;
+    --line:#e2e8f0; --line2:#cbd5e1;
+    --ink:#0f172a; --muted:#64748b; --muted2:#94a3b8;
+    --brand:#2563eb; --brand-d:#1d4ed8; --brand-soft:#eff6ff;
+    --ok:#059669; --ok-soft:#ecfdf5;
+    --warn:#d97706; --warn-soft:#fffbeb;
+    --danger:#dc2626; --danger-soft:#fef2f2;
+    --info:#0891b2; --info-soft:#ecfeff;
+    --purple:#7c3aed; --purple-soft:#f5f3ff;
+    --radius:12px; --shadow:0 1px 2px rgba(15,23,42,.06),0 8px 24px rgba(15,23,42,.06);
+    --font:'Segoe UI',system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font);background:var(--panel-2);color:var(--ink);font-size:14px;line-height:1.5}
+  button{font-family:inherit;cursor:pointer}
+  input,select,textarea{font-family:inherit;font-size:14px}
+
+  /* Layout */
+  .app{display:flex;min-height:100vh}
+  .side{width:250px;flex-shrink:0;background:var(--bg);color:#cbd5e1;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+  .brand{padding:20px 18px;border-bottom:1px solid #1e293b;display:flex;gap:11px;align-items:center}
+  .brand .logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#3b82f6,#2563eb);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+  .brand h1{font-size:14px;margin:0;color:#fff;font-weight:700;line-height:1.25}
+  .brand p{margin:1px 0 0;font-size:11px;color:#64748b}
+  nav{padding:12px 10px;flex:1;overflow:auto}
+  .nav-label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#475569;padding:14px 10px 6px;font-weight:700}
+  .nav-item{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px;color:#cbd5e1;font-size:13.5px;font-weight:500;border:none;background:none;width:100%;text-align:left;margin-bottom:2px;transition:.12s}
+  .nav-item:hover{background:#1e293b;color:#fff}
+  .nav-item.active{background:var(--brand);color:#fff;box-shadow:0 4px 12px rgba(37,99,235,.35)}
+  .nav-item .ico{font-size:16px;width:20px;text-align:center}
+  .nav-item .badge{margin-left:auto;background:#334155;color:#cbd5e1;font-size:11px;padding:1px 8px;border-radius:20px;font-weight:600}
+  .nav-item.active .badge{background:rgba(255,255,255,.25);color:#fff}
+  .side-foot{padding:14px 18px;border-top:1px solid #1e293b;font-size:11px;color:#64748b}
+
+  .main{flex:1;min-width:0;display:flex;flex-direction:column}
+  .topbar{background:var(--panel);border-bottom:1px solid var(--line);padding:16px 28px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:20}
+  .topbar h2{margin:0;font-size:18px;font-weight:700}
+  .topbar .sub{color:var(--muted);font-size:12.5px;margin-top:1px}
+  .topbar .spacer{flex:1}
+  .content{padding:26px 28px 60px;max-width:1240px;width:100%}
+
+  /* Buttons */
+  .btn{border:1px solid var(--line2);background:#fff;color:var(--ink);padding:9px 15px;border-radius:9px;font-weight:600;font-size:13.5px;display:inline-flex;align-items:center;gap:7px;transition:.12s}
+  .btn:hover{background:var(--panel-2);border-color:var(--muted2)}
+  .btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+  .btn.primary:hover{background:var(--brand-d)}
+  .btn.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+  .btn.ok:hover{filter:brightness(.94)}
+  .btn.ghost{background:none;border-color:transparent}
+  .btn.sm{padding:6px 11px;font-size:12.5px;border-radius:8px}
+  .btn.danger{color:var(--danger);border-color:#fecaca}
+  .btn.danger:hover{background:var(--danger-soft)}
+
+  /* Cards */
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+  .card-h{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}
+  .card-h h3{margin:0;font-size:15px;font-weight:700}
+  .card-h .sub{color:var(--muted);font-size:12px;margin-top:1px}
+  .card-b{padding:20px}
+
+  /* KPI */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+  .kpi .ico{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:12px}
+  .kpi .val{font-size:30px;font-weight:800;letter-spacing:-.02em;line-height:1}
+  .kpi .lab{color:var(--muted);font-size:12.5px;margin-top:5px;font-weight:500}
+  .kpi .trend{position:absolute;top:18px;right:18px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px}
+
+  /* Grid helpers */
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:1080px){.grid-2{grid-template-columns:1fr}.kpis{grid-template-columns:1fr 1fr}.grid-3{grid-template-columns:1fr}}
+
+  /* Table */
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  thead th{text-align:left;padding:11px 12px;color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--line);background:var(--panel-2);white-space:nowrap}
+  tbody td{padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:var(--panel-2)}
+  .folio{font-family:'SF Mono',ui-monospace,Menlo,monospace;font-weight:700;font-size:12.5px;color:var(--brand)}
+  .plate{font-family:'SF Mono',ui-monospace,Menlo,monospace;font-weight:700;letter-spacing:.06em;background:#fef9c3;border:1px solid #fde047;color:#713f12;padding:3px 8px;border-radius:6px;font-size:12px;display:inline-block}
+
+  /* Badges */
+  .tag{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:20px;white-space:nowrap}
+  .t-ingreso{background:var(--brand-soft);color:var(--brand-d)}
+  .t-siniestro{background:var(--danger-soft);color:var(--danger)}
+  .t-reemplazo{background:var(--purple-soft);color:var(--purple)}
+  .s-solicitada{background:#f1f5f9;color:#475569}
+  .s-servicio{background:var(--info-soft);color:var(--info)}
+  .s-entregado{background:var(--warn-soft);color:var(--warn)}
+  .s-retirado{background:var(--purple-soft);color:var(--purple)}
+  .s-cerrada{background:var(--ok-soft);color:var(--ok)}
+  .dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+
+  /* Forms */
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field.full{grid-column:1/-1}
+  label{font-size:12.5px;font-weight:600;color:#334155}
+  label .req{color:var(--danger)}
+  input[type=text],input[type=date],input[type=datetime-local],select,textarea{
+    padding:10px 12px;border:1px solid var(--line2);border-radius:9px;background:#fff;color:var(--ink);width:100%;transition:.12s}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+  textarea{resize:vertical;min-height:76px}
+  .hint{font-size:11.5px;color:var(--muted2)}
+
+  /* Toolbar / filters */
+  .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:18px}
+  .search{flex:1;min-width:200px;position:relative}
+  .search input{padding-left:36px}
+  .search .si{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted2)}
+  .chip{padding:7px 13px;border-radius:20px;border:1px solid var(--line2);background:#fff;font-size:12.5px;font-weight:600;color:var(--muted)}
+  .chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+  /* Timeline / control dates */
+  .timeline{display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative;margin-top:4px}
+  .tl-step{text-align:center;position:relative;padding-top:26px}
+  .tl-step::before{content:'';position:absolute;top:8px;left:0;right:0;height:2px;background:var(--line)}
+  .tl-step:first-child::before{left:50%}
+  .tl-step:last-child::before{right:50%}
+  .tl-step .node{position:absolute;top:2px;left:50%;transform:translateX(-50%);width:15px;height:15px;border-radius:50%;background:#fff;border:2px solid var(--line2);z-index:2}
+  .tl-step.done .node{background:var(--ok);border-color:var(--ok)}
+  .tl-step.done::before{background:var(--ok)}
+  .tl-step .tl-lab{font-size:11px;color:var(--muted);font-weight:600}
+  .tl-step .tl-date{font-size:12px;font-weight:700;margin-top:2px}
+  .tl-step.pending .tl-date{color:var(--muted2);font-weight:500}
+
+  /* Modal */
+  .overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(2px);z-index:100;display:none;align-items:flex-start;justify-content:center;padding:40px 20px;overflow:auto}
+  .overlay.show{display:flex}
+  .modal{background:#fff;border-radius:16px;width:100%;max-width:720px;box-shadow:0 24px 64px rgba(0,0,0,.3);animation:pop .18s ease}
+  @keyframes pop{from{transform:translateY(12px);opacity:0}to{transform:none;opacity:1}}
+  .modal-h{padding:20px 24px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}
+  .modal-h h3{margin:0;font-size:17px;font-weight:700;flex:1}
+  .modal-b{padding:24px}
+  .modal-f{padding:16px 24px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px;background:var(--panel-2);border-radius:0 0 16px 16px}
+  .x{width:32px;height:32px;border-radius:8px;border:none;background:var(--panel-2);color:var(--muted);font-size:18px;display:flex;align-items:center;justify-content:center}
+  .x:hover{background:var(--line);color:var(--ink)}
+
+  .empty{text-align:center;padding:48px 20px;color:var(--muted)}
+  .empty .ico{font-size:40px;opacity:.4;margin-bottom:10px}
+
+  .row-actions{display:flex;gap:6px;justify-content:flex-end}
+  .kv{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px}
+  .kv:last-child{border:none}
+  .kv .k{color:var(--muted);font-weight:500}
+  .kv .v{font-weight:600}
+  .section-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:22px 0 12px}
+
+  .toast{position:fixed;bottom:24px;right:24px;background:var(--ink);color:#fff;padding:13px 18px;border-radius:11px;font-size:13.5px;font-weight:600;box-shadow:0 12px 32px rgba(0,0,0,.25);z-index:200;display:flex;align-items:center;gap:10px;transform:translateY(80px);opacity:0;transition:.28s}
+  .toast.show{transform:none;opacity:1}
+  .req-note{font-size:11px;color:var(--muted2);margin-top:14px}
+  .hide{display:none!important}
+  .veh-hist{font-size:12.5px}
+  .veh-hist li{padding:8px 0;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:baseline}
+  .veh-hist li:last-child{border:none}
+  .mini-date{font-family:'SF Mono',ui-monospace,monospace;font-size:11.5px;color:var(--muted);white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="side">
+    <div class="brand">
+      <div class="logo">🚗</div>
+      <div>
+        <h1>Plataforma de Control</h1>
+        <p>Vehículos de Reemplazo</p>
+      </div>
+    </div>
+    <nav>
+      <div class="nav-label">Operación</div>
+      <button class="nav-item active" data-view="panel"><span class="ico">📊</span> Panel de control</button>
+      <button class="nav-item" data-view="solicitudes"><span class="ico">📋</span> Solicitudes <span class="badge" id="badge-sol">0</span></button>
+      <button class="nav-item" data-view="vehiculos"><span class="ico">🚙</span> Vehículos <span class="badge" id="badge-veh">0</span></button>
+      <div class="nav-label">Gestión</div>
+      <button class="nav-item" data-view="nueva"><span class="ico">➕</span> Nueva solicitud</button>
+      <button class="nav-item" data-view="exportar"><span class="ico">📤</span> Exportar datos</button>
+      <button class="nav-item" data-view="requisitos"><span class="ico">✅</span> Requisitos</button>
+    </nav>
+    <div class="side-foot">
+      Prototipo demostrativo<br>Cumple bases de licitación · v1.0
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <h2 id="view-title">Panel de control</h2>
+        <div class="sub" id="view-sub">Resumen general del servicio</div>
+      </div>
+      <div class="spacer"></div>
+      <button class="btn primary" onclick="openNueva()"><span>➕</span> Nueva solicitud</button>
+    </div>
+    <div class="content" id="content"><!-- render --></div>
+  </div>
+</div>
+
+<!-- Modal detalle -->
+<div class="overlay" id="overlay">
+  <div class="modal" id="modal"><!-- render --></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   MODELO DE DATOS (en memoria — prototipo)
+   Entidades: solicitudes y vehículos.
+   Fechas de control exigidas por las bases:
+     - fechaSolicitud
+     - fechaIngresoServicio
+     - fechaNotificacionEntrega  (notificación entrega de vehículo)
+     - fechaRetiro               (retiro del vehículo desde instalaciones)
+   ============================================================ */
+
+const TIPOS = ['Ingreso a servicio','Siniestro','Vehículo de reemplazo'];
+const ESTADOS = ['Solicitada','En servicio','Vehículo entregado','Vehículo retirado','Cerrada'];
+
+let vehiculos = [
+  {placa:'GKRT-45', marca:'Toyota',    modelo:'Corolla',   anio:2023, color:'Blanco', estado:'Asignado'},
+  {placa:'HJPL-92', marca:'Hyundai',   modelo:'Accent',    anio:2022, color:'Gris',   estado:'Disponible'},
+  {placa:'LMBS-17', marca:'Kia',       modelo:'Rio',       anio:2024, color:'Rojo',   estado:'Disponible'},
+  {placa:'FTZK-03', marca:'Chevrolet', modelo:'Sail',      anio:2021, color:'Negro',  estado:'En taller'},
+  {placa:'PDRV-88', marca:'Nissan',    modelo:'Versa',     anio:2023, color:'Plata',  estado:'Asignado'},
+  {placa:'BWQC-56', marca:'Suzuki',    modelo:'Swift',     anio:2024, color:'Azul',   estado:'Disponible'},
+];
+
+let solicitudes = [
+  {folio:'SOL-2026-0001', tipo:'Ingreso a servicio', placa:'GKRT-45', solicitante:'Aseg. Andes S.A.', contacto:'María Rojas', sucursal:'Santiago Centro',
+    descripcion:'Ingreso a servicio por mantención preventiva programada.', estado:'Vehículo retirado',
+    fechaSolicitud:'2026-07-10', fechaIngresoServicio:'2026-07-11', fechaNotificacionEntrega:'2026-07-11', fechaRetiro:'2026-07-18'},
+  {folio:'SOL-2026-0002', tipo:'Siniestro', placa:'PDRV-88', solicitante:'Aseg. Andes S.A.', contacto:'Juan Pérez', sucursal:'Providencia',
+    descripcion:'Colisión menor en estacionamiento, requiere evaluación de daños.', estado:'Vehículo entregado',
+    fechaSolicitud:'2026-07-15', fechaIngresoServicio:'2026-07-16', fechaNotificacionEntrega:'2026-07-17', fechaRetiro:''},
+  {folio:'SOL-2026-0003', tipo:'Vehículo de reemplazo', placa:'HJPL-92', solicitante:'Flota Sur Ltda.', contacto:'Carla Muñoz', sucursal:'Maipú',
+    descripcion:'Solicitud de vehículo de reemplazo mientras el titular está en taller.', estado:'En servicio',
+    fechaSolicitud:'2026-07-20', fechaIngresoServicio:'2026-07-21', fechaNotificacionEntrega:'', fechaRetiro:''},
+  {folio:'SOL-2026-0004', tipo:'Siniestro', placa:'FTZK-03', solicitante:'Aseg. Andes S.A.', contacto:'Pedro Soto', sucursal:'Santiago Centro',
+    descripcion:'Siniestro con daño estructural, vehículo derivado a taller especializado.', estado:'En servicio',
+    fechaSolicitud:'2026-07-21', fechaIngresoServicio:'2026-07-22', fechaNotificacionEntrega:'', fechaRetiro:''},
+  {folio:'SOL-2026-0005', tipo:'Vehículo de reemplazo', placa:'', solicitante:'Flota Sur Ltda.', contacto:'Ana Vidal', sucursal:'Ñuñoa',
+    descripcion:'Requiere vehículo de reemplazo categoría sedán para cliente corporativo.', estado:'Solicitada',
+    fechaSolicitud:'2026-07-23', fechaIngresoServicio:'', fechaNotificacionEntrega:'', fechaRetiro:''},
+];
+
+let folioSeq = 6;
+
+/* ============================================================
+   UTILIDADES
+   ============================================================ */
+const $ = s => document.querySelector(s);
+const fmtDate = d => d ? new Date(d+'T00:00:00').toLocaleDateString('es-CL',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+const esc = s => (s??'').toString().replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const todayISO = () => new Date().toISOString().slice(0,10);
+
+function tipoTag(t){
+  const cls = t==='Ingreso a servicio'?'t-ingreso':t==='Siniestro'?'t-siniestro':'t-reemplazo';
+  return `<span class="tag ${cls}"><span class="dot"></span>${esc(t)}</span>`;
+}
+function estadoTag(e){
+  const map={'Solicitada':'s-solicitada','En servicio':'s-servicio','Vehículo entregado':'s-entregado','Vehículo retirado':'s-retirado','Cerrada':'s-cerrada'};
+  return `<span class="tag ${map[e]||'s-solicitada'}">${esc(e)}</span>`;
+}
+function plate(p){ return p ? `<span class="plate">${esc(p)}</span>` : '<span style="color:var(--muted2)">Sin asignar</span>'; }
+
+function toast(msg){
+  const t=$('#toast'); t.innerHTML='✓ '+esc(msg); t.classList.add('show');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2600);
+}
+
+/* ============================================================
+   NAVEGACIÓN
+   ============================================================ */
+let currentView='panel';
+const VIEW_META={
+  panel:['Panel de control','Resumen general del servicio'],
+  solicitudes:['Solicitudes','Historial completo de acciones y fechas de control'],
+  vehiculos:['Vehículos','Registro de placas patentes e historial'],
+  nueva:['Nueva solicitud','Agendar ingreso, notificar siniestro o solicitar reemplazo'],
+  exportar:['Exportar datos','Extracción de la base de datos'],
+  requisitos:['Requisitos','Trazabilidad con las bases de licitación'],
+};
+function nav(view){
+  currentView=view;
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.view===view));
+  $('#view-title').textContent=VIEW_META[view][0];
+  $('#view-sub').textContent=VIEW_META[view][1];
+  render();
+}
+document.querySelectorAll('.nav-item').forEach(b=>b.addEventListener('click',()=>nav(b.dataset.view)));
+
+function refreshBadges(){
+  $('#badge-sol').textContent=solicitudes.length;
+  $('#badge-veh').textContent=vehiculos.length;
+}
+
+/* ============================================================
+   RENDER PRINCIPAL
+   ============================================================ */
+function render(){
+  refreshBadges();
+  const c=$('#content');
+  if(currentView==='panel') c.innerHTML=renderPanel();
+  else if(currentView==='solicitudes') c.innerHTML=renderSolicitudes();
+  else if(currentView==='vehiculos') c.innerHTML=renderVehiculos();
+  else if(currentView==='nueva') c.innerHTML=renderNueva();
+  else if(currentView==='exportar') c.innerHTML=renderExportar();
+  else if(currentView==='requisitos') c.innerHTML=renderRequisitos();
+  attachViewHandlers();
+}
+
+/* ---------- PANEL ---------- */
+function renderPanel(){
+  const activas = solicitudes.filter(s=>s.estado!=='Cerrada' && s.estado!=='Vehículo retirado').length;
+  const siniestros = solicitudes.filter(s=>s.tipo==='Siniestro').length;
+  const reemplazos = solicitudes.filter(s=>s.tipo==='Vehículo de reemplazo').length;
+  const disp = vehiculos.filter(v=>v.estado==='Disponible').length;
+
+  const recientes = [...solicitudes].sort((a,b)=>(b.fechaSolicitud||'').localeCompare(a.fechaSolicitud||'')).slice(0,6);
+
+  // distribución por estado
+  const byEstado = ESTADOS.map(e=>({e, n:solicitudes.filter(s=>s.estado===e).length}));
+  const maxE = Math.max(1,...byEstado.map(x=>x.n));
+
+  return `
+  <div class="kpis">
+    <div class="kpi"><div class="ico" style="background:var(--brand-soft);color:var(--brand)">📋</div>
+      <div class="val">${solicitudes.length}</div><div class="lab">Solicitudes totales</div>
+      <span class="trend" style="background:var(--brand-soft);color:var(--brand-d)">${activas} activas</span></div>
+    <div class="kpi"><div class="ico" style="background:var(--danger-soft);color:var(--danger)">⚠️</div>
+      <div class="val">${siniestros}</div><div class="lab">Siniestros notificados</div></div>
+    <div class="kpi"><div class="ico" style="background:var(--purple-soft);color:var(--purple)">🔄</div>
+      <div class="val">${reemplazos}</div><div class="lab">Vehículos de reemplazo</div></div>
+    <div class="kpi"><div class="ico" style="background:var(--ok-soft);color:var(--ok)">🚙</div>
+      <div class="val">${disp}<span style="font-size:16px;color:var(--muted)">/${vehiculos.length}</span></div><div class="lab">Vehículos disponibles</div></div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-h"><div><h3>Solicitudes recientes</h3><div class="sub">Últimas acciones registradas</div></div>
+        <div style="margin-left:auto"><button class="btn sm" onclick="nav('solicitudes')">Ver todas →</button></div></div>
+      <div class="card-b" style="padding:0">
+        <table><thead><tr><th>Folio</th><th>Tipo</th><th>Placa</th><th>Estado</th><th>Solicitud</th></tr></thead><tbody>
+        ${recientes.map(s=>`<tr style="cursor:pointer" onclick="openDetalle('${s.folio}')">
+          <td><span class="folio">${esc(s.folio)}</span></td>
+          <td>${tipoTag(s.tipo)}</td>
+          <td>${plate(s.placa)}</td>
+          <td>${estadoTag(s.estado)}</td>
+          <td>${fmtDate(s.fechaSolicitud)}</td></tr>`).join('')}
+        </tbody></table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><div><h3>Estado del flujo</h3><div class="sub">Distribución de solicitudes por etapa</div></div></div>
+      <div class="card-b">
+        ${byEstado.map(x=>`
+          <div style="margin-bottom:15px">
+            <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:5px">
+              <span style="font-weight:600">${esc(x.e)}</span><span style="color:var(--muted);font-weight:700">${x.n}</span></div>
+            <div style="height:9px;background:var(--panel-2);border-radius:6px;overflow:hidden">
+              <div style="height:100%;width:${x.n/maxE*100}%;background:var(--brand);border-radius:6px;transition:.4s"></div></div>
+          </div>`).join('')}
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:22px">
+    <div class="card-h"><div><h3>Fechas de control pendientes</h3><div class="sub">Solicitudes que requieren registrar una fecha</div></div></div>
+    <div class="card-b" style="padding:0">
+      ${renderPendientes()}
+    </div>
+  </div>`;
+}
+
+function renderPendientes(){
+  const pend = solicitudes.filter(s=>s.estado!=='Cerrada' && (!s.fechaIngresoServicio||!s.fechaNotificacionEntrega||!s.fechaRetiro));
+  if(!pend.length) return `<div class="empty"><div class="ico">✅</div>No hay fechas de control pendientes.</div>`;
+  return `<table><thead><tr><th>Folio</th><th>Placa</th><th>Estado actual</th><th>Próxima fecha por registrar</th><th></th></tr></thead><tbody>
+    ${pend.map(s=>{
+      let next='—';
+      if(!s.fechaIngresoServicio) next='Fecha de ingreso a servicio';
+      else if(!s.fechaNotificacionEntrega) next='Notificación de entrega';
+      else if(!s.fechaRetiro) next='Retiro del vehículo';
+      return `<tr><td><span class="folio">${esc(s.folio)}</span></td><td>${plate(s.placa)}</td><td>${estadoTag(s.estado)}</td>
+        <td style="color:var(--warn);font-weight:600">⏳ ${next}</td>
+        <td class="row-actions"><button class="btn sm primary" onclick="openDetalle('${s.folio}')">Registrar</button></td></tr>`;
+    }).join('')}
+  </tbody></table>`;
+}
+
+/* ---------- SOLICITUDES ---------- */
+let filterTipo='', searchQ='';
+function renderSolicitudes(){
+  return `
+  <div class="toolbar">
+    <div class="search"><span class="si">🔎</span><input type="text" id="sq" placeholder="Buscar por folio, placa, solicitante..." value="${esc(searchQ)}"></div>
+    <button class="chip ${filterTipo===''?'on':''}" data-tipo="">Todos</button>
+    <button class="chip ${filterTipo==='Ingreso a servicio'?'on':''}" data-tipo="Ingreso a servicio">Ingresos</button>
+    <button class="chip ${filterTipo==='Siniestro'?'on':''}" data-tipo="Siniestro">Siniestros</button>
+    <button class="chip ${filterTipo==='Vehículo de reemplazo'?'on':''}" data-tipo="Vehículo de reemplazo">Reemplazos</button>
+    <button class="btn ok" onclick="nav('exportar')"><span>📤</span> Exportar</button>
+  </div>
+  <div class="card"><div class="card-b" style="padding:0" id="sol-table">${renderSolTable()}</div></div>`;
+}
+function filteredSol(){
+  const q=searchQ.toLowerCase();
+  return solicitudes.filter(s=>{
+    if(filterTipo && s.tipo!==filterTipo) return false;
+    if(!q) return true;
+    return [s.folio,s.placa,s.solicitante,s.contacto,s.sucursal,s.descripcion].join(' ').toLowerCase().includes(q);
+  });
+}
+function renderSolTable(){
+  const list=filteredSol();
+  if(!list.length) return `<div class="empty"><div class="ico">📭</div>No hay solicitudes que coincidan con el filtro.</div>`;
+  return `<table><thead><tr>
+    <th>Folio</th><th>Tipo</th><th>Placa</th><th>Solicitante</th>
+    <th>F. Solicitud</th><th>F. Ingreso</th><th>F. Notif. entrega</th><th>F. Retiro</th><th>Estado</th><th></th>
+  </tr></thead><tbody>
+  ${list.map(s=>`<tr>
+    <td><span class="folio">${esc(s.folio)}</span></td>
+    <td>${tipoTag(s.tipo)}</td>
+    <td>${plate(s.placa)}</td>
+    <td>${esc(s.solicitante)}<div class="hint">${esc(s.contacto)}</div></td>
+    <td>${fmtDate(s.fechaSolicitud)}</td>
+    <td>${fmtDate(s.fechaIngresoServicio)}</td>
+    <td>${fmtDate(s.fechaNotificacionEntrega)}</td>
+    <td>${fmtDate(s.fechaRetiro)}</td>
+    <td>${estadoTag(s.estado)}</td>
+    <td class="row-actions"><button class="btn sm" onclick="openDetalle('${s.folio}')">Ver</button></td>
+  </tr>`).join('')}
+  </tbody></table>`;
+}
+
+/* ---------- VEHÍCULOS ---------- */
+function renderVehiculos(){
+  return `
+  <div class="toolbar">
+    <div class="search"><span class="si">🔎</span><input type="text" id="vq" placeholder="Buscar por placa, marca, modelo..."></div>
+    <button class="btn primary" onclick="openNuevoVehiculo()"><span>➕</span> Registrar vehículo</button>
+  </div>
+  <div class="card"><div class="card-b" style="padding:0" id="veh-table">${renderVehTable('')}</div></div>`;
+}
+function renderVehTable(q){
+  q=(q||'').toLowerCase();
+  const list=vehiculos.filter(v=>[v.placa,v.marca,v.modelo,v.color].join(' ').toLowerCase().includes(q));
+  if(!list.length) return `<div class="empty"><div class="ico">🚙</div>No hay vehículos registrados que coincidan.</div>`;
+  return `<table><thead><tr><th>Placa patente</th><th>Vehículo</th><th>Año</th><th>Color</th><th>Estado</th><th>Solicitudes</th><th></th></tr></thead><tbody>
+  ${list.map(v=>{
+    const n=solicitudes.filter(s=>s.placa===v.placa).length;
+    const em={'Disponible':'s-cerrada','Asignado':'s-servicio','En taller':'s-entregado'}[v.estado]||'s-solicitada';
+    return `<tr>
+      <td>${plate(v.placa)}</td>
+      <td><b>${esc(v.marca)} ${esc(v.modelo)}</b></td>
+      <td>${v.anio}</td>
+      <td>${esc(v.color)}</td>
+      <td><span class="tag ${em}">${esc(v.estado)}</span></td>
+      <td><b>${n}</b> registro${n!==1?'s':''}</td>
+      <td class="row-actions"><button class="btn sm" onclick="openVehiculo('${esc(v.placa)}')">Historial</button></td>
+    </tr>`;
+  }).join('')}
+  </tbody></table>`;
+}
+
+/* ---------- NUEVA SOLICITUD ---------- */
+function renderNueva(){
+  const dispVeh = vehiculos;
+  return `
+  <div class="card" style="max-width:820px">
+    <div class="card-h"><div><h3>Registrar nueva solicitud</h3><div class="sub">Se genera un folio y se registra automáticamente la fecha de solicitud</div></div></div>
+    <div class="card-b">
+      <div class="section-title">Tipo de acción</div>
+      <div class="grid-3" id="tipo-cards">
+        ${[
+          {t:'Ingreso a servicio',i:'📥',d:'Agendar el ingreso de un vehículo a servicio',c:'t-ingreso'},
+          {t:'Siniestro',i:'⚠️',d:'Notificar un siniestro de un vehículo',c:'t-siniestro'},
+          {t:'Vehículo de reemplazo',i:'🔄',d:'Solicitar un vehículo de reemplazo',c:'t-reemplazo'},
+        ].map((o,idx)=>`
+          <label class="card" style="padding:15px;cursor:pointer;border:2px solid var(--line);display:block" data-tipo-card="${esc(o.t)}">
+            <input type="radio" name="tipo" value="${esc(o.t)}" ${idx===0?'checked':''} style="display:none">
+            <div style="font-size:26px;margin-bottom:8px">${o.i}</div>
+            <div style="font-weight:700;font-size:13.5px;margin-bottom:3px">${esc(o.t)}</div>
+            <div class="hint">${esc(o.d)}</div>
+          </label>`).join('')}
+      </div>
+
+      <div class="section-title">Datos de la solicitud</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Solicitante / mandante <span class="req">*</span></label>
+          <input type="text" id="f-solicitante" placeholder="Ej: Aseguradora Andes S.A.">
+        </div>
+        <div class="field">
+          <label>Contacto</label>
+          <input type="text" id="f-contacto" placeholder="Nombre del contacto">
+        </div>
+        <div class="field">
+          <label>Sucursal / ubicación</label>
+          <input type="text" id="f-sucursal" placeholder="Ej: Santiago Centro">
+        </div>
+        <div class="field">
+          <label>Placa patente del vehículo</label>
+          <select id="f-placa">
+            <option value="">— Sin asignar / se asignará después —</option>
+            ${dispVeh.map(v=>`<option value="${esc(v.placa)}">${esc(v.placa)} · ${esc(v.marca)} ${esc(v.modelo)} (${esc(v.estado)})</option>`).join('')}
+          </select>
+          <span class="hint">Puedes registrar la placa ahora o al asignar el vehículo.</span>
+        </div>
+        <div class="field full">
+          <label>Descripción / detalle</label>
+          <textarea id="f-desc" placeholder="Describe el motivo de la solicitud, condiciones del vehículo, etc."></textarea>
+        </div>
+        <div class="field">
+          <label>Fecha de solicitud <span class="req">*</span></label>
+          <input type="date" id="f-fsolicitud" value="${todayISO()}">
+        </div>
+      </div>
+      <p class="req-note">Los campos marcados con <span class="req">*</span> son obligatorios. La fecha de solicitud queda registrada como primera fecha de control.</p>
+      <div style="display:flex;gap:10px;margin-top:18px">
+        <button class="btn primary" onclick="guardarNueva()"><span>💾</span> Registrar solicitud</button>
+        <button class="btn" onclick="nav('panel')">Cancelar</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------- EXPORTAR ---------- */
+function renderExportar(){
+  const preview = solicitudes.slice(0,3);
+  return `
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-h"><div><h3>Extracción de base de datos</h3><div class="sub">Exporta las fechas de control, tipo de solicitud y placas patentes</div></div></div>
+      <div class="card-b">
+        <p style="color:var(--muted);margin-top:0">Genera un archivo con todos los registros del sistema. Cumple el requisito de las bases: "extracción de bases de datos que describa las fechas de control, tipo de solicitud y placas patentes de los vehículos".</p>
+        <div class="section-title">Solicitudes (con fechas de control)</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn ok" onclick="exportCSV()"><span>📄</span> Exportar CSV</button>
+          <button class="btn" onclick="exportJSON()"><span>🗂️</span> Exportar JSON</button>
+        </div>
+        <div class="section-title">Registro de vehículos</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn ok" onclick="exportVehCSV()"><span>📄</span> Placas patentes (CSV)</button>
+        </div>
+        <div class="section-title">Reporte completo</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn primary" onclick="exportAll()"><span>📦</span> Exportar todo (JSON)</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><div><h3>Columnas incluidas</h3><div class="sub">Estructura del archivo de solicitudes</div></div></div>
+      <div class="card-b">
+        ${['Folio','Tipo de solicitud','Placa patente','Solicitante','Contacto','Sucursal',
+           'Fecha de solicitud','Fecha de ingreso a servicio','Fecha de notificación de entrega','Fecha de retiro','Estado','Descripción']
+          .map(c=>`<div class="kv"><span class="k">${esc(c)}</span><span class="v" style="color:var(--ok)">✓</span></div>`).join('')}
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:22px">
+    <div class="card-h"><div><h3>Vista previa</h3><div class="sub">Primeros registros de la exportación</div></div></div>
+    <div class="card-b" style="padding:0;overflow:auto">
+      <table><thead><tr><th>Folio</th><th>Tipo</th><th>Placa</th><th>F.Sol.</th><th>F.Ing.</th><th>F.Notif.</th><th>F.Ret.</th><th>Estado</th></tr></thead><tbody>
+      ${preview.map(s=>`<tr>
+        <td><span class="folio">${esc(s.folio)}</span></td><td>${tipoTag(s.tipo)}</td><td>${plate(s.placa)}</td>
+        <td>${fmtDate(s.fechaSolicitud)}</td><td>${fmtDate(s.fechaIngresoServicio)}</td>
+        <td>${fmtDate(s.fechaNotificacionEntrega)}</td><td>${fmtDate(s.fechaRetiro)}</td><td>${estadoTag(s.estado)}</td>
+      </tr>`).join('')}
+      </tbody></table>
+    </div>
+  </div>`;
+}
+
+/* ---------- REQUISITOS ---------- */
+function renderRequisitos(){
+  const reqs=[
+    {r:'Agendar ingresos a servicio', d:'Formulario "Nueva solicitud" tipo Ingreso a servicio', ok:true, view:'nueva'},
+    {r:'Notificar siniestros', d:'Formulario "Nueva solicitud" tipo Siniestro', ok:true, view:'nueva'},
+    {r:'Solicitar vehículos de reemplazo', d:'Formulario "Nueva solicitud" tipo Vehículo de reemplazo', ok:true, view:'nueva'},
+    {r:'Historial de acciones asociadas', d:'Cada solicitud guarda su historial completo y timeline', ok:true, view:'solicitudes'},
+    {r:'Fecha de solicitud', d:'Registrada automáticamente al crear la solicitud', ok:true, view:'solicitudes'},
+    {r:'Fecha de ingreso a servicio', d:'Registrable desde el detalle de cada solicitud', ok:true, view:'solicitudes'},
+    {r:'Fecha de notificación de entrega del vehículo', d:'Registrable desde el detalle de cada solicitud', ok:true, view:'solicitudes'},
+    {r:'Fecha de retiro del vehículo desde instalaciones', d:'Registrable desde el detalle de cada solicitud', ok:true, view:'solicitudes'},
+    {r:'Registrar placa patente de cada vehículo', d:'Módulo "Vehículos" con registro de placas patentes', ok:true, view:'vehiculos'},
+    {r:'Historial por vehículo', d:'Cada placa muestra todas sus solicitudes asociadas', ok:true, view:'vehiculos'},
+    {r:'Extracción de base de datos (fechas, tipo, placas)', d:'Módulo "Exportar" en CSV y JSON', ok:true, view:'exportar'},
+  ];
+  return `
+  <div class="card">
+    <div class="card-h"><div><h3>Trazabilidad con las bases de licitación</h3><div class="sub">Cada requisito exigido y dónde se cumple en la plataforma</div></div>
+      <div style="margin-left:auto"><span class="tag s-cerrada">${reqs.filter(x=>x.ok).length}/${reqs.length} cubiertos</span></div></div>
+    <div class="card-b" style="padding:0">
+      <table><thead><tr><th style="width:40px"></th><th>Requisito de las bases</th><th>Implementación</th><th></th></tr></thead><tbody>
+      ${reqs.map(x=>`<tr>
+        <td style="text-align:center;font-size:18px">${x.ok?'✅':'⬜'}</td>
+        <td style="font-weight:600">${esc(x.r)}</td>
+        <td style="color:var(--muted)">${esc(x.d)}</td>
+        <td class="row-actions"><button class="btn sm" onclick="nav('${x.view}')">Ir →</button></td>
+      </tr>`).join('')}
+      </tbody></table>
+    </div>
+  </div>
+  <div class="card" style="margin-top:22px">
+    <div class="card-b" style="display:flex;gap:16px;align-items:center">
+      <div style="font-size:34px">📌</div>
+      <div>
+        <div style="font-weight:700;margin-bottom:3px">Nota sobre el prototipo</div>
+        <div style="color:var(--muted);font-size:13px">Este es un prototipo funcional de demostración. Los datos se guardan en memoria durante la sesión (no hay backend). Para producción se recomienda una base de datos persistente, autenticación de usuarios y control de accesos por rol.</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ============================================================
+   DETALLE DE SOLICITUD (modal) + registro de fechas de control
+   ============================================================ */
+function openDetalle(folio){
+  const s=solicitudes.find(x=>x.folio===folio); if(!s) return;
+  const steps=[
+    {lab:'Solicitud', date:s.fechaSolicitud, key:'fechaSolicitud'},
+    {lab:'Ingreso a servicio', date:s.fechaIngresoServicio, key:'fechaIngresoServicio'},
+    {lab:'Notif. entrega', date:s.fechaNotificacionEntrega, key:'fechaNotificacionEntrega'},
+    {lab:'Retiro vehículo', date:s.fechaRetiro, key:'fechaRetiro'},
+  ];
+  $('#modal').innerHTML=`
+    <div class="modal-h">
+      ${tipoTag(s.tipo)}
+      <h3>${esc(s.folio)}</h3>
+      <button class="x" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-b">
+      <div class="section-title" style="margin-top:0">Fechas de control</div>
+      <div class="timeline">
+        ${steps.map(st=>`<div class="tl-step ${st.date?'done':'pending'}"><div class="node"></div>
+          <div class="tl-lab">${st.lab}</div><div class="tl-date">${st.date?fmtDate(st.date):'Pendiente'}</div></div>`).join('')}
+      </div>
+
+      <div class="section-title">Registrar / actualizar fechas</div>
+      <div class="form-grid">
+        <div class="field"><label>Fecha de solicitud</label><input type="date" id="d-fsol" value="${s.fechaSolicitud||''}"></div>
+        <div class="field"><label>Fecha de ingreso a servicio</label><input type="date" id="d-fing" value="${s.fechaIngresoServicio||''}"></div>
+        <div class="field"><label>Fecha de notificación de entrega</label><input type="date" id="d-fnot" value="${s.fechaNotificacionEntrega||''}"></div>
+        <div class="field"><label>Fecha de retiro del vehículo</label><input type="date" id="d-fret" value="${s.fechaRetiro||''}"></div>
+        <div class="field"><label>Placa patente asignada</label>
+          <select id="d-placa">
+            <option value="">— Sin asignar —</option>
+            ${vehiculos.map(v=>`<option value="${esc(v.placa)}" ${v.placa===s.placa?'selected':''}>${esc(v.placa)} · ${esc(v.marca)} ${esc(v.modelo)}</option>`).join('')}
+          </select></div>
+        <div class="field"><label>Estado</label>
+          <select id="d-estado">${ESTADOS.map(e=>`<option ${e===s.estado?'selected':''}>${e}</option>`).join('')}</select></div>
+      </div>
+
+      <div class="section-title">Datos del registro</div>
+      <div class="kv"><span class="k">Solicitante</span><span class="v">${esc(s.solicitante)}</span></div>
+      <div class="kv"><span class="k">Contacto</span><span class="v">${esc(s.contacto||'—')}</span></div>
+      <div class="kv"><span class="k">Sucursal</span><span class="v">${esc(s.sucursal||'—')}</span></div>
+      <div class="kv"><span class="k">Descripción</span><span class="v" style="max-width:60%;text-align:right">${esc(s.descripcion||'—')}</span></div>
+    </div>
+    <div class="modal-f">
+      <button class="btn danger" onclick="eliminarSol('${s.folio}')">Eliminar</button>
+      <button class="btn" onclick="closeModal()">Cerrar</button>
+      <button class="btn primary" onclick="guardarDetalle('${s.folio}')"><span>💾</span> Guardar cambios</button>
+    </div>`;
+  $('#overlay').classList.add('show');
+}
+function guardarDetalle(folio){
+  const s=solicitudes.find(x=>x.folio===folio); if(!s) return;
+  s.fechaSolicitud=$('#d-fsol').value;
+  s.fechaIngresoServicio=$('#d-fing').value;
+  s.fechaNotificacionEntrega=$('#d-fnot').value;
+  s.fechaRetiro=$('#d-fret').value;
+  s.placa=$('#d-placa').value;
+  s.estado=$('#d-estado').value;
+  closeModal(); render(); toast('Solicitud '+folio+' actualizada');
+}
+function eliminarSol(folio){
+  solicitudes=solicitudes.filter(x=>x.folio!==folio);
+  closeModal(); render(); toast('Solicitud eliminada');
+}
+
+/* ---------- Detalle vehículo ---------- */
+function openVehiculo(placa){
+  const v=vehiculos.find(x=>x.placa===placa); if(!v) return;
+  const hist=solicitudes.filter(s=>s.placa===placa).sort((a,b)=>(b.fechaSolicitud||'').localeCompare(a.fechaSolicitud||''));
+  $('#modal').innerHTML=`
+    <div class="modal-h"><span class="plate">${esc(v.placa)}</span><h3 style="margin-left:4px">${esc(v.marca)} ${esc(v.modelo)}</h3><button class="x" onclick="closeModal()">×</button></div>
+    <div class="modal-b">
+      <div class="grid-3" style="gap:12px">
+        <div class="kpi" style="box-shadow:none;padding:14px"><div class="lab">Año</div><div style="font-weight:700;font-size:16px">${v.anio}</div></div>
+        <div class="kpi" style="box-shadow:none;padding:14px"><div class="lab">Color</div><div style="font-weight:700;font-size:16px">${esc(v.color)}</div></div>
+        <div class="kpi" style="box-shadow:none;padding:14px"><div class="lab">Estado</div><div style="font-weight:700;font-size:16px">${esc(v.estado)}</div></div>
+      </div>
+      <div class="section-title">Historial de la placa patente <span style="color:var(--muted2)">(${hist.length})</span></div>
+      ${hist.length?`<ul class="veh-hist" style="list-style:none;padding:0;margin:0">
+        ${hist.map(s=>`<li>
+          <span class="mini-date">${fmtDate(s.fechaSolicitud)}</span>
+          <div style="flex:1">${tipoTag(s.tipo)} <span class="folio">${esc(s.folio)}</span><div class="hint">${esc(s.descripcion||'')}</div></div>
+          ${estadoTag(s.estado)}
+        </li>`).join('')}
+      </ul>`:`<div class="empty"><div class="ico">📭</div>Sin solicitudes asociadas.</div>`}
+    </div>
+    <div class="modal-f">
+      <button class="btn danger" onclick="eliminarVeh('${esc(v.placa)}')">Eliminar</button>
+      <button class="btn primary" onclick="closeModal()">Cerrar</button>
+    </div>`;
+  $('#overlay').classList.add('show');
+}
+function eliminarVeh(placa){
+  vehiculos=vehiculos.filter(v=>v.placa!==placa);
+  closeModal(); render(); toast('Vehículo eliminado');
+}
+
+/* ---------- Nuevo vehículo (modal) ---------- */
+function openNuevoVehiculo(){
+  $('#modal').innerHTML=`
+    <div class="modal-h"><h3>Registrar vehículo</h3><button class="x" onclick="closeModal()">×</button></div>
+    <div class="modal-b">
+      <div class="form-grid">
+        <div class="field"><label>Placa patente <span class="req">*</span></label><input type="text" id="v-placa" placeholder="Ej: GKRT-45" style="text-transform:uppercase"></div>
+        <div class="field"><label>Marca</label><input type="text" id="v-marca" placeholder="Ej: Toyota"></div>
+        <div class="field"><label>Modelo</label><input type="text" id="v-modelo" placeholder="Ej: Corolla"></div>
+        <div class="field"><label>Año</label><input type="text" id="v-anio" placeholder="Ej: 2024"></div>
+        <div class="field"><label>Color</label><input type="text" id="v-color" placeholder="Ej: Blanco"></div>
+        <div class="field"><label>Estado</label><select id="v-estado"><option>Disponible</option><option>Asignado</option><option>En taller</option></select></div>
+      </div>
+    </div>
+    <div class="modal-f">
+      <button class="btn" onclick="closeModal()">Cancelar</button>
+      <button class="btn primary" onclick="guardarVehiculo()"><span>💾</span> Registrar</button>
+    </div>`;
+  $('#overlay').classList.add('show');
+}
+function guardarVehiculo(){
+  const placa=($('#v-placa').value||'').trim().toUpperCase();
+  if(!placa){ toast('Ingresa la placa patente'); return; }
+  if(vehiculos.some(v=>v.placa===placa)){ toast('Esa placa ya está registrada'); return; }
+  vehiculos.push({placa, marca:$('#v-marca').value||'—', modelo:$('#v-modelo').value||'—',
+    anio:$('#v-anio').value||'—', color:$('#v-color').value||'—', estado:$('#v-estado').value});
+  closeModal(); render(); toast('Vehículo '+placa+' registrado');
+}
+
+/* ---------- Guardar nueva solicitud ---------- */
+function guardarNueva(){
+  const tipo=(document.querySelector('input[name="tipo"]:checked')||{}).value;
+  const solicitante=($('#f-solicitante').value||'').trim();
+  if(!solicitante){ toast('Ingresa el solicitante'); $('#f-solicitante').focus(); return; }
+  const fsol=$('#f-fsolicitud').value||todayISO();
+  const folio='SOL-'+new Date(fsol+'T00:00:00').getFullYear()+'-'+String(folioSeq++).padStart(4,'0');
+  solicitudes.unshift({
+    folio, tipo, placa:$('#f-placa').value||'',
+    solicitante, contacto:$('#f-contacto').value||'', sucursal:$('#f-sucursal').value||'',
+    descripcion:$('#f-desc').value||'', estado:'Solicitada',
+    fechaSolicitud:fsol, fechaIngresoServicio:'', fechaNotificacionEntrega:'', fechaRetiro:''
+  });
+  toast('Solicitud '+folio+' registrada');
+  nav('solicitudes');
+}
+function openNueva(){ nav('nueva'); }
+
+/* ============================================================
+   EXPORTACIÓN (extracción de base de datos)
+   ============================================================ */
+function download(filename, content, mime){
+  const blob=new Blob([content],{type:mime});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+function csvCell(v){ v=(v??'').toString(); return /[",;\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
+function exportCSV(){
+  const head=['Folio','Tipo de solicitud','Placa patente','Solicitante','Contacto','Sucursal',
+    'Fecha de solicitud','Fecha de ingreso a servicio','Fecha de notificacion de entrega','Fecha de retiro','Estado','Descripcion'];
+  const rows=solicitudes.map(s=>[s.folio,s.tipo,s.placa,s.solicitante,s.contacto,s.sucursal,
+    s.fechaSolicitud,s.fechaIngresoServicio,s.fechaNotificacionEntrega,s.fechaRetiro,s.estado,s.descripcion].map(csvCell).join(';'));
+  const csv='﻿'+[head.join(';'),...rows].join('\n');
+  download('solicitudes_'+todayISO()+'.csv', csv, 'text/csv;charset=utf-8');
+  toast('Base de datos exportada ('+solicitudes.length+' registros)');
+}
+function exportVehCSV(){
+  const head=['Placa patente','Marca','Modelo','Anio','Color','Estado','N solicitudes'];
+  const rows=vehiculos.map(v=>[v.placa,v.marca,v.modelo,v.anio,v.color,v.estado,
+    solicitudes.filter(s=>s.placa===v.placa).length].map(csvCell).join(';'));
+  download('vehiculos_'+todayISO()+'.csv','﻿'+[head.join(';'),...rows].join('\n'),'text/csv;charset=utf-8');
+  toast('Registro de vehículos exportado');
+}
+function exportJSON(){
+  download('solicitudes_'+todayISO()+'.json', JSON.stringify(solicitudes,null,2),'application/json');
+  toast('Solicitudes exportadas (JSON)');
+}
+function exportAll(){
+  const data={generado:new Date().toISOString(), solicitudes, vehiculos};
+  download('plataforma_export_'+todayISO()+'.json', JSON.stringify(data,null,2),'application/json');
+  toast('Exportación completa generada');
+}
+
+/* ============================================================
+   HANDLERS DE VISTA
+   ============================================================ */
+function attachViewHandlers(){
+  if(currentView==='solicitudes'){
+    const sq=$('#sq'); if(sq){ sq.oninput=e=>{searchQ=e.target.value; $('#sol-table').innerHTML=renderSolTable();};
+      sq.focus(); sq.setSelectionRange(sq.value.length,sq.value.length); }
+    document.querySelectorAll('[data-tipo]').forEach(b=>b.onclick=()=>{filterTipo=b.dataset.tipo; render();});
+  }
+  if(currentView==='vehiculos'){
+    const vq=$('#vq'); if(vq) vq.oninput=e=>{ $('#veh-table').innerHTML=renderVehTable(e.target.value); };
+  }
+  if(currentView==='nueva'){
+    document.querySelectorAll('[data-tipo-card]').forEach(card=>{
+      const upd=()=>document.querySelectorAll('[data-tipo-card]').forEach(c=>{
+        const on=c.querySelector('input').checked;
+        c.style.borderColor=on?'var(--brand)':'var(--line)';
+        c.style.background=on?'var(--brand-soft)':'#fff';
+      });
+      card.onclick=()=>{card.querySelector('input').checked=true; upd();};
+      upd();
+    });
+  }
+}
+function closeModal(){ $('#overlay').classList.remove('show'); }
+$('#overlay').addEventListener('click',e=>{ if(e.target.id==='overlay') closeModal(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
+
+/* INIT */
+render();
+</script>
+</body>
+</html>
