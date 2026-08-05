@@ -3,48 +3,39 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vértix — Plataformas</title>
-<meta name="description" content="Acceso directo a las plataformas Vértix: SOS24, Plataforma de Vehículos y Estamos Contigo.">
+<title>Plataformas</title>
+<meta name="description" content="Acceso directo a las plataformas: SOS24, Plataforma de Vehículos y Estamos Contigo.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#081B33;
-    --bg2:#0B2545;
-    --card:#0F2D52;
-    --card-hover:#133864;
+    --bg:#0B0B0D;
+    --bg2:#141416;
+    --card:#17171B;
+    --card-hover:#1E1E24;
     --line:rgba(255,255,255,.08);
-    --text:#EAF1FA;
-    --muted:#9FB3CC;
+    --text:#F2F2F4;
+    --muted:#9A9AA3;
     --sos:#FF5A5F;
-    --veh:#33C6FF;
+    --veh:#F5A524;
     --ec:#9B7BFF;
   }
   *{margin:0;padding:0;box-sizing:border-box}
   body{
     font-family:'Inter',system-ui,-apple-system,sans-serif;
-    background:radial-gradient(1200px 600px at 80% -10%,rgba(51,198,255,.10) 0%,transparent 60%),linear-gradient(160deg,var(--bg2) 0%,var(--bg) 100%);
+    background:radial-gradient(1100px 550px at 80% -10%,rgba(255,255,255,.05) 0%,transparent 60%),linear-gradient(165deg,var(--bg2) 0%,var(--bg) 55%);
     color:var(--text);
     min-height:100vh;
     display:flex;
     flex-direction:column;
   }
   .wrap{width:min(960px,92%);margin:0 auto;flex:1}
-  header{padding:56px 0 8px}
-  .logo{
-    font-family:'Space Grotesk',sans-serif;
-    font-weight:700;
-    font-size:15px;
-    letter-spacing:.35em;
-    color:var(--muted);
-    text-transform:uppercase;
-  }
+  header{padding:60px 0 8px}
   h1{
     font-family:'Space Grotesk',sans-serif;
     font-size:clamp(30px,5vw,44px);
     font-weight:700;
-    margin-top:14px;
     letter-spacing:-.01em;
   }
   .sub{color:var(--muted);margin-top:10px;font-size:16px;max-width:520px;line-height:1.6}
@@ -58,7 +49,7 @@
     display:flex;
     flex-direction:column;
     gap:14px;
-    background:linear-gradient(180deg,var(--card) 0%,rgba(15,45,82,.55) 100%);
+    background:linear-gradient(180deg,var(--card) 0%,rgba(23,23,27,.55) 100%);
     border:1px solid var(--line);
     border-radius:18px;
     padding:26px 24px 22px;
@@ -76,14 +67,14 @@
     background:var(--accent);
     opacity:.9;
   }
-  .card:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.2);background:var(--card-hover)}
+  .card:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.22);background:var(--card-hover)}
   .mark{
     width:46px;height:46px;
     border-radius:12px;
     display:flex;align-items:center;justify-content:center;
     font-family:'Space Grotesk',sans-serif;
     font-weight:700;font-size:19px;
-    background:color-mix(in srgb,var(--accent) 16%,transparent);
+    background:color-mix(in srgb,var(--accent) 15%,transparent);
     color:var(--accent);
     border:1px solid color-mix(in srgb,var(--accent) 35%,transparent);
   }
@@ -108,16 +99,15 @@
     padding:22px 0 30px;
     margin-top:24px;
   }
-  footer .wrap{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:13px}
+  footer .wrap{display:flex;justify-content:flex-end;color:var(--muted);font-size:13px}
   footer a{color:var(--muted);text-decoration:none}
   footer a:hover{color:var(--text)}
-  @media (max-width:560px){header{padding-top:42px}}
+  @media (max-width:560px){header{padding-top:44px}}
 </style>
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div class="logo">Vértix</div>
       <h1>Plataformas</h1>
       <p class="sub">Acceso directo a las plataformas en desarrollo. Selecciona una para abrirla.</p>
     </header>
@@ -157,7 +147,6 @@
 
   <footer>
     <div class="wrap">
-      <span>Vértix · Chile</span>
       <a href="mailto:wertdiego@gmail.com">wertdiego@gmail.com</a>
     </div>
   </footer>
